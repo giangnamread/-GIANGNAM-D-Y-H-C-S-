@@ -412,6 +412,7 @@
         <p>Trung tâm GDNN-GDTX Gio Linh, Quảng Trị • Truy cập chính thức tại: <span class="text-indigo-400 font-semibold">giangnam146.site</span></p>
     </footer>
 
+    <!-- Custom Message Modal -->
     <div id="customMessageModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-sm p-6 text-center space-y-4 relative shadow-2xl">
             <div id="msgModalIcon" class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center text-xl"><i class="fa-solid fa-bell"></i></div>
@@ -692,7 +693,7 @@
                 <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl space-y-2">
                     <label class="block text-xs font-bold text-indigo-300">📥 Nhập nhanh toàn bộ bộ đề (Dán văn bản 50 câu có sẵn)</label>
                     <p class="text-[11px] text-slate-400 leading-relaxed">Dán nội dung toàn bộ đề (VD: Câu 1: ... A. ... B. ... C. ... D. ... Đáp án: B) vào ô dưới đây, hệ thống sẽ tự động tách, làm sạch tiền tố và thêm vào bộ đề:</p>
-                    <textarea id="bulkPasteText" rows="5" placeholder="Ví dụ:&#10;Câu 1: Đơn vị gia tốc là gì?&#10;A. m/s&#10;B. m/s2&#10;C. N&#10;D. kg&#10;Đáp án: B" class="w-full bg-slate-900 border border-indigo-500/50 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-400"></textarea>
+                    <textarea id="bulkPasteText" rows="5" placeholder="Ví dụ:&#10;Câu 1: Truyền thống của nhà trường được hiểu là gì?&#10;A. Ý A&#10;B. Ý B&#10;C. Ý C&#10;D. Ý D&#10;Đáp án: B" class="w-full bg-slate-900 border border-indigo-500/50 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-400"></textarea>
                     <button type="button" onclick="parseBulkQuestions()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Tự động phân tích & Thêm vào bộ đề</button>
                 </div>
 
@@ -847,10 +848,10 @@
         window.tempQuizQuestions = [];
         window.activeTakingQuizCode = null;
 
-        // Clean question text to remove any embedded "Câu X:" prefix so shuffling doesn't leave stray question numbers
+        // Clean question text to remove any embedded prefixes like "Câu X:", "1.", etc.
         function cleanQuestionText(rawText) {
             if (!rawText) return "";
-            return rawText.replace(/^(câu\s*\d+[\:\.]?\s*|\d+[\.\)]\s*)/i, '').trim();
+            return String(rawText).replace(/^(câu\s*\d+[\:\.]?\s*|\d+[\.\)]\s*)/i, '').trim();
         }
 
         // High-Entropy Seeded Shuffling Engine (Shuffles question order and option contents while preserving A, B, C, D labels)
@@ -908,7 +909,12 @@
                     { name: 'quizzes', key: 'gn_quizzes', setter: (data) => { window.quizzesList = data; localStorage.setItem('gn_quizzes', JSON.stringify(data)); } },
                     { name: 'students', key: 'gn_students', setter: (data) => { window.studentsList = data; localStorage.setItem('gn_students', JSON.stringify(data)); ensureUniqueCodesPerCard(); } },
                     { name: 'classes', key: 'gn_classes', setter: (data) => { window.classesList = data; localStorage.setItem('gn_classes', JSON.stringify(data)); } },
-                    { name: 'master_questions', key: 'gn_master_questions', setter: (data) => { window.masterQuestionsList = data; localStorage.setItem('gn_master_questions', JSON.stringify(data)); } }
+                    { name: 'master_questions', key: 'gn_master_questions', setter: (data) => { 
+                        if (data && data.length > 0 && data[0].questions) {
+                            window.masterQuestionsList = data[0].questions;
+                            localStorage.setItem('gn_master_questions', JSON.stringify(window.masterQuestionsList));
+                        }
+                    } }
                 ];
 
                 collectionsToSync.forEach(colInfo => {
@@ -989,7 +995,9 @@
 
         function syncQuizzesWithStudentCodes() {
             if (!window.studentsList || window.studentsList.length === 0) return;
-            const sourceQuestions = (window.masterQuestionsList && window.masterQuestionsList.length > 0) ? window.masterQuestionsList : (window.quizzesList.find(q => q.questions && q.questions.length > 3)?.questions || []);
+            const sourceQuestions = (window.masterQuestionsList && window.masterQuestionsList.length > 0) 
+                ? window.masterQuestionsList 
+                : (window.quizzesList.find(q => q.questions && q.questions.length > 0)?.questions || []);
             
             if (sourceQuestions.length === 0) return;
 
@@ -1344,8 +1352,11 @@
                 if (subtitle) subtitle.innerHTML = `Học sinh <b>${window.currentUser.name}</b> được phân công mã đề tráo đổi độc lập: <span class="text-emerald-400 font-bold font-mono text-base">[${assignedCode}]</span>.`;
                 
                 let assignedQuiz = window.quizzesList.find(q => String(q.code) === String(assignedCode));
+                
+                // If quiz or questions not found for this code, generate from master questions uploaded by teacher
                 if (!assignedQuiz || !assignedQuiz.questions || assignedQuiz.questions.length === 0) {
-                    const sourceQuestions = (window.masterQuestionsList && window.masterQuestionsList.length > 0) ? window.masterQuestionsList : (window.quizzesList.find(q => q.questions && q.questions.length > 3)?.questions || []);
+                    const sourceQuestions = (window.masterQuestionsList && window.masterQuestionsList.length > 0) ? window.masterQuestionsList : [];
+                    
                     if (sourceQuestions.length > 0) {
                         const shuffledQs = shuffleQuestionsWithSeed(sourceQuestions, assignedCode);
                         assignedQuiz = {
@@ -1357,18 +1368,18 @@
                             questions: shuffledQs
                         };
                         window.quizzesList.push(assignedQuiz);
-                    } else {
-                        const defaultMaster = [
-                            { text: "Đơn vị của gia tốc trong hệ SI là gì?", options: { A: "m/s", B: "m/s2", C: "N", D: "kg.m/s" }, correct: "B" },
-                            { text: "Công thức tính quãng đường đi được của chuyển động thẳng biến đổi đều là?", options: { A: "s = v0.t + 0.5.a.t^2", B: "s = v.t", C: "s = a.t^2", D: "s = v0.t - a.t" }, correct: "A" }
-                        ];
-                        assignedQuiz = {
-                            id: 'quiz_' + assignedCode,
-                            title: `Bài kiểm tra định kỳ (Mã đề ${assignedCode})`,
-                            code: assignedCode,
-                            questions: shuffleQuestionsWithSeed(defaultMaster, assignedCode)
-                        };
                     }
+                }
+
+                if (!assignedQuiz || !assignedQuiz.questions || assignedQuiz.questions.length === 0) {
+                    container.innerHTML = `
+                        <div class="bg-slate-800/80 border border-amber-500/40 rounded-2xl p-8 text-center space-y-4">
+                            <div class="w-12 h-12 bg-amber-600/20 text-amber-400 rounded-2xl mx-auto flex items-center justify-center text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h3 class="font-bold text-lg text-white">Chưa có đề kiểm tra</h3>
+                            <p class="text-xs text-slate-400 max-w-sm mx-auto">Giáo viên chưa tải lên hoặc phát hành bộ đề trắc nghiệm trên hệ thống. Em vui lòng quay lại sau khi giáo viên đã tạo đề!</p>
+                        </div>
+                    `;
+                    return;
                 }
 
                 if (window.activeTakingQuizCode === assignedCode) {
@@ -1928,7 +1939,8 @@
                 return;
             }
 
-            // Save master questions
+            // Save master questions cleaned
+            window.tempQuizQuestions.forEach(q => { q.text = cleanQuestionText(q.text); });
             syncToCloudAndLocal('master_questions', { id: 'master', questions: window.tempQuizQuestions });
 
             // Clear old quizzes and generate shuffled versions for all student codes
