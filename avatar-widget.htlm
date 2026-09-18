@@ -1,0 +1,66 @@
+<!-- ========================================== -->
+<!-- FILE RIÊNG: avatar-widget.html             -->
+<!-- Dùng để đưa lên GitHub và nhúng vào web     -->
+<!-- ========================================== -->
+
+<div class="avatar-widget-container">
+    <!-- CSS riêng cho component -->
+    <style>
+        .avatar-widget-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .avatar-widget-container .avatar-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .avatar-widget-container .change-avatar-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .avatar-widget-container .change-avatar-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+    <!-- HTML giao diện -->
+    <img id="avatar-preview" src="https://via.placeholder.com/150" alt="Ảnh đại diện" class="avatar-img">
+    <label for="avatar-input" class="change-avatar-btn">Đổi ảnh đại diện</label>
+    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+
+    <!-- JavaScript xử lý xem trước ảnh -->
+    <script>
+        (function() {
+            const avatarInput = document.getElementById('avatar-input');
+            const avatarPreview = document.getElementById('avatar-preview');
+
+            if (avatarInput && avatarPreview) {
+                avatarInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const imageUrl = URL.createObjectURL(file);
+                        avatarPreview.src = imageUrl;
+                    }
+                });
+            }
+        })();
+    </script>
+</div>
