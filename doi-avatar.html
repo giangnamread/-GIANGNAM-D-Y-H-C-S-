@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đổi Ảnh Đại Diện - GIANG NAM DẠY HỌC SỐ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="bg-slate-800/80 border border-slate-700 rounded-3xl p-8 max-w-md w-full text-center space-y-6 shadow-2xl">
+        <div>
+            <span class="text-xs uppercase font-bold tracking-wider text-indigo-400">giangnam146.site</span>
+            <h2 class="text-2xl font-bold text-white mt-1">Quản lý Ảnh Đại Diện</h2>
+            <p class="text-xs text-slate-400 mt-1">Cập nhật ảnh đại diện cá nhân cho Thầy Nguyễn Giang Nam</p>
+        </div>
+
+        <!-- Khung hiển thị ảnh đại diện -->
+        <div class="relative w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-indigo-500/50 shadow-2xl bg-slate-700">
+            <img id="avatarPreview" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="Ảnh đại diện" class="w-full h-full object-cover">
+        </div>
+
+        <!-- Các nút thao tác -->
+        <div class="space-y-3">
+            <label for="avatarFileInput" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 px-4 rounded-xl font-semibold cursor-pointer transition flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30">
+                <i class="fa-solid fa-camera"></i>
+                <span>Chọn ảnh mới từ máy tính</span>
+            </label>
+            <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="handleFileSelected(event)">
+
+            <button onclick="resetDefaultAvatar()" class="w-full bg-slate-700 hover:bg-slate-600 text-slate-300 py-2.5 px-4 rounded-xl text-xs font-semibold transition">
+                Khôi phục ảnh mặc định
+            </button>
+        </div>
+
+        <!-- Nút liên kết quay lại trang chủ website -->
+        <div class="pt-4 border-t border-slate-700">
+            <a href="index.html" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Quay lại trang chủ giangnam146.site</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Script xử lý lưu và đồng bộ -->
+    <script>
+        const STORAGE_KEY = 'gn_teacher_avatar';
+        const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400';
+
+        // Tải ảnh đã lưu trước đó khi mở trang
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedImg = localStorage.getItem(STORAGE_KEY);
+            if (savedImg) {
+                document.getElementById('avatarPreview').src = savedImg;
+            }
+        });
+
+        // Xử lý khi chọn file ảnh
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result;
+                    document.getElementById('avatarPreview').src = base64Data;
+                    
+                    // Lưu vĩnh viễn vào localStorage để trang chính (index.html) tự động nhận diện
+                    localStorage.setItem(STORAGE_KEY, base64Data);
+                    alert('Đã cập nhật và lưu ảnh đại diện thành công!');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Đặt lại ảnh mặc định
+        function resetDefaultAvatar() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('avatarPreview').src = DEFAULT_AVATAR;
+            alert('Đã khôi phục ảnh đại diện về mặc định!');
+        }
+    </script>
+</body>
+</html>
