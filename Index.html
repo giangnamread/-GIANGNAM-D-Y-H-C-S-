@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GIANG NAM - DẠY HỌC SỐ | giangnam146.site</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Document Parsers (Word & Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -38,10 +36,10 @@
             
             signInAnonymously(window.auth).then(() => {
                 window.cloudSyncActive = true;
-                console.log("Cloud Firestore Connected & Authenticated for giangnam146.");
+                console.log("Cloud Firestore Connected & Authenticated for giangnam146 (Project ID: giangnam146-5a353).");
                 const statusEl = document.getElementById('cloudStatusText');
                 if (statusEl) {
-                    statusEl.innerText = "Cloud Firestore Sync Active (giangnam146)";
+                    statusEl.innerText = "Cloud Firestore Sync Active (giangnam146-5a353)";
                 }
                 if (typeof window.initCloudListeners === 'function') {
                     window.initCloudListeners();
@@ -116,6 +114,9 @@
             </nav>
 
             <div class="flex items-center space-x-3">
+                <button onclick="forceSyncCloudData()" title="Đồng bộ dữ liệu từ đám mây" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-cloud-arrow-down"></i><span class="hidden sm:inline">Đồng bộ</span>
+                </button>
                 <div id="authHeaderArea">
                     <button onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
                         <i class="fa-solid fa-right-to-bracket"></i>
@@ -166,7 +167,7 @@
                 <div class="relative z-10 max-w-2xl space-y-6">
                     <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold uppercase tracking-wider border border-indigo-500/30">Nền tảng giáo dục số thông minh</span>
                     <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">GIANG NAM - DẠY HỌC SỐ</h1>
-                    <p class="text-slate-300 text-base md:text-lg">Hệ thống học tập số hiện đại, lưu trữ đám mây vĩnh viễn trên Cloud Firestore (giangnam146-5a353), phân loại kho đề độc lập theo khối (Khối 10: 11 chủ đề, Khối 11 & 12: 10 chủ đề), định thời gian mở/đóng đề chính xác, tráo đảo 4 mã đề (1000–9999), xuất Word chuẩn lề Sở (Trái 2.5, Phải/Trên/Dưới 1.5), Phiếu tô A4 gọn 1 trang & Chấm điểm định tính HĐTN.</p>
+                    <p class="text-slate-300 text-base md:text-lg">Hệ thống học tập số hiện đại, lưu trữ đám mây vĩnh viễn trên Cloud Firestore (giangnam146-5a353), phân loại kho đề độc lập theo khối (Khối 10: 11 chủ đề, Khối 11 & 12: 10 chủ đề), định thời gian mở/đóng đề chính xác, chống thi lại nhiều lần, đồng hồ đếm ngược 45 phút, xuất Word chuẩn lề Sở (Trái 2.5, Phải/Trên/Dưới 1.5), Phiếu tô A4 gọn 1 trang & Chấm điểm định tính HĐTN.</p>
                     <div class="flex flex-wrap gap-4 pt-2">
                         <button onclick="switchTab('lessons')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-600/30 transition">Khám phá bài giảng</button>
                         <button onclick="openQrModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-6 py-3 rounded-xl font-semibold transition flex items-center space-x-2">
@@ -335,8 +336,13 @@
                     <span class="text-xs uppercase font-bold tracking-wider text-indigo-400">HỆ THỐNG QUẢN TRỊ GIANGNAM146.SITE (giangnam146-5a353)</span>
                     <h2 class="text-2xl font-bold text-white">DASHBOARD GIÁO VIÊN</h2>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-                    <i class="fa-solid fa-cloud-arrow-up"></i><span id="cloudStatusText">Cloud Firestore Sync Active</span>
+                <div class="flex items-center space-x-3">
+                    <button onclick="forceSyncCloudData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                        <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải lại dữ liệu Đám Mây</span>
+                    </button>
+                    <div class="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                        <i class="fa-solid fa-cloud-arrow-up"></i><span id="cloudStatusText">Cloud Firestore Sync Active</span>
+                    </div>
                 </div>
             </div>
 
@@ -568,6 +574,7 @@
         </div>
     </div>
 
+    <!-- Auth Modal -->
     <div id="authModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 sm:p-8 space-y-6 shadow-2xl relative">
             <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -587,7 +594,7 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Chọn lớp học của em</label>
                         <select id="loginStudentClass" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
-                            <!-- Populated dynamically -->
+                            <!-- Populated dynamically from cloud classes -->
                         </select>
                     </div>
                     <div>
@@ -1233,51 +1240,60 @@
             } catch (e) {}
         }
 
-        // Cloud Firestore Synchronization Hook with Real-time Listeners for Lessons & Documents
-        window.initCloudListeners = function() {
+        // Enhanced Real-Time & Initial Fetch Cloud Sync Engine (Guarantees immediate loading on mobile and all devices)
+        window.initCloudListeners = async function() {
             if (!window.db) return;
             try {
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'submissions'), (snapshot) => {
-                    let cloudSubs = [];
-                    snapshot.forEach(docSnap => cloudSubs.push(docSnap.data()));
-                    if (cloudSubs.length > 0) {
-                        window.submissionsList = cloudSubs;
-                        localStorage.setItem('gn_submissions', JSON.stringify(window.submissionsList));
-                        refreshActiveViews();
+                const collectionsToSync = ['classes', 'students', 'lessons', 'documents', 'submissions'];
+                for (const colName of collectionsToSync) {
+                    const qRef = collection(window.db, 'artifacts', appId, 'public', 'data', colName);
+                    
+                    // Initial Fetch using getDocs to instantly load on mobile
+                    try {
+                        const snapshot = await getDocs(qRef);
+                        let cloudData = [];
+                        snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
+                        if (cloudData.length > 0) {
+                            if (colName === 'classes') { window.classesList = cloudData; localStorage.setItem('gn_classes', JSON.stringify(cloudData)); }
+                            else if (colName === 'students') { window.studentsList = cloudData; localStorage.setItem('gn_students', JSON.stringify(cloudData)); }
+                            else if (colName === 'lessons') { window.lessonsList = cloudData; localStorage.setItem('gn_lessons', JSON.stringify(cloudData)); }
+                            else if (colName === 'documents') { window.documentsList = cloudData; localStorage.setItem('gn_documents', JSON.stringify(cloudData)); }
+                            else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
+                        }
+                    } catch (fetchErr) {
+                        console.warn(`Fetch notice for ${colName}:`, fetchErr);
                     }
-                }, (err) => {});
 
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'students'), (snapshot) => {
-                    let cloudStudents = [];
-                    snapshot.forEach(docSnap => cloudStudents.push(docSnap.data()));
-                    if (cloudStudents.length > 0) {
-                        window.studentsList = cloudStudents;
-                        localStorage.setItem('gn_students', JSON.stringify(window.studentsList));
-                        refreshActiveViews();
-                    }
-                }, (err) => {});
-
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'lessons'), (snapshot) => {
-                    let cloudLessons = [];
-                    snapshot.forEach(docSnap => cloudLessons.push(docSnap.data()));
-                    if (cloudLessons.length > 0) {
-                        window.lessonsList = cloudLessons;
-                        localStorage.setItem('gn_lessons', JSON.stringify(window.lessonsList));
-                        refreshActiveViews();
-                    }
-                }, (err) => {});
-
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'documents'), (snapshot) => {
-                    let cloudDocs = [];
-                    snapshot.forEach(docSnap => cloudDocs.push(docSnap.data()));
-                    if (cloudDocs.length > 0) {
-                        window.documentsList = cloudDocs;
-                        localStorage.setItem('gn_documents', JSON.stringify(window.documentsList));
-                        refreshActiveViews();
-                    }
-                }, (err) => {});
-            } catch (e) {}
+                    // Real-time snapshot listener
+                    onSnapshot(qRef, (snapshot) => {
+                        let cloudData = [];
+                        snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
+                        if (cloudData.length > 0) {
+                            if (colName === 'classes') { window.classesList = cloudData; localStorage.setItem('gn_classes', JSON.stringify(cloudData)); }
+                            else if (colName === 'students') { window.studentsList = cloudData; localStorage.setItem('gn_students', JSON.stringify(cloudData)); }
+                            else if (colName === 'lessons') { window.lessonsList = cloudData; localStorage.setItem('gn_lessons', JSON.stringify(cloudData)); }
+                            else if (colName === 'documents') { window.documentsList = cloudData; localStorage.setItem('gn_documents', JSON.stringify(cloudData)); }
+                            else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
+                            refreshActiveViews();
+                        }
+                    }, (err) => {
+                        console.warn(`Listener error for ${colName}:`, err);
+                    });
+                }
+                refreshActiveViews();
+            } catch (e) {
+                console.warn("Cloud sync init warning:", e);
+            }
         };
+
+        function forceSyncCloudData() {
+            if (typeof window.initCloudListeners === 'function') {
+                window.initCloudListeners();
+                showMessage('Đồng bộ thành công', 'Đã tải mới toàn bộ dữ liệu từ đám mây (giangnam146-5a353) vào thiết bị của bạn!');
+            } else {
+                showMessage('Thông báo', 'Đang kết nối đám mây...');
+            }
+        }
 
         function saveToCloud(collectionName, dataList) {
             try {
