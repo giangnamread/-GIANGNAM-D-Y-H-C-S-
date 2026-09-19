@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GIANG NAM - DẠY HỌC SỐ | giangnam146.site</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Document Parsers (Word & Excel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Firebase SDK v11 -->
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -24,12 +22,13 @@
 
         try {
             const firebaseConfig = {
-                apiKey: "AIzaSyDummyKeyForGiangNam146",
-                authDomain: "giangnam146.firebaseapp.com",
-                projectId: "giangnam146",
-                storageBucket: "giangnam146.appspot.com",
-                messagingSenderId: "123456789",
-                appId: "1:123:web:abc"
+                apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
+                authDomain: "giangnam146-5a353.firebaseapp.com",
+                projectId: "giangnam146-5a353",
+                storageBucket: "giangnam146-5a353.firebasestorage.app",
+                messagingSenderId: "299610757174",
+                appId: "1:299610757174:web:ab3b0f3270932a2dcae097",
+                measurementId: "G-VPGHE5M58L"
             };
             window.firebaseApp = initializeApp(firebaseConfig);
             window.db = getFirestore(window.firebaseApp);
@@ -37,17 +36,22 @@
             
             signInAnonymously(window.auth).then(() => {
                 window.cloudSyncActive = true;
-                console.log("Cloud Firestore Connected & Authenticated.");
+                console.log("Cloud Firestore Connected & Authenticated for giangnam146 (Project ID: giangnam146-5a353).");
+                const statusEl = document.getElementById('cloudStatusText');
+                if (statusEl) {
+                    statusEl.innerText = "Cloud Firestore Sync Active (giangnam146-5a353)";
+                }
                 if (typeof window.initCloudListeners === 'function') {
                     window.initCloudListeners();
                 }
             }).catch(err => {
-                console.warn("Cloud Auth Notice (Hybrid Local/Backup Mode Active):", err);
+                console.warn("Cloud Auth Notice:", err);
             });
         } catch (e) {
             console.warn("Firebase Init Notice:", e);
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -87,7 +91,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white pb-20 md:pb-0">
 
-    <!-- Header -->
     <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
@@ -111,6 +114,9 @@
             </nav>
 
             <div class="flex items-center space-x-3">
+                <button onclick="forceSyncCloudData()" title="Đồng bộ dữ liệu từ đám mây" class="bg-slate-800 hover:bg-slate-700 text-indigo-400 px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-cloud-arrow-down"></i><span class="hidden sm:inline">Đồng bộ</span>
+                </button>
                 <div id="authHeaderArea">
                     <button onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition flex items-center space-x-2">
                         <i class="fa-solid fa-right-to-bracket"></i>
@@ -124,7 +130,6 @@
         </div>
     </header>
 
-    <!-- Marquee Banner (Thầy Nguyễn Giang Nam) -->
     <div class="marquee-wrapper">
         <div class="marquee-content">
             <span>👨‍🏫 Chào mừng đến với không gian trực tuyến của <span class="highlight">Thầy Nguyễn Giang Nam</span></span>
@@ -138,7 +143,6 @@
         </div>
     </div>
 
-    <!-- Mobile Menu -->
     <div id="mobileMenu" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex-col p-6">
         <div class="flex justify-between items-center mb-8">
             <span class="font-bold text-lg text-indigo-400">Menu giangnam146.site</span>
@@ -163,7 +167,7 @@
                 <div class="relative z-10 max-w-2xl space-y-6">
                     <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold uppercase tracking-wider border border-indigo-500/30">Nền tảng giáo dục số thông minh</span>
                     <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white">GIANG NAM - DẠY HỌC SỐ</h1>
-                    <p class="text-slate-300 text-base md:text-lg">Hệ thống học tập số hiện đại, phân loại theo môn và khối (Khối 10: 11 chủ đề, Khối 11 & 12: 10 chủ đề). Lưu trữ đám mây vĩnh viễn trên Cloud Firestore, tráo đảo mã đề (1000–9999) chống gian lận, xuất Word chuẩn Sở (Lề 2.5/1.5), Phiếu tô A4 chuẩn 1 trang & Chấm điểm tự động qua ảnh OMR.</p>
+                    <p class="text-slate-300 text-base md:text-lg">Hệ thống học tập số hiện đại, lưu trữ đám mây vĩnh viễn trên Cloud Firestore (giangnam146-5a353), phân loại kho đề độc lập theo khối (Khối 10: 11 chủ đề, Khối 11 & 12: 10 chủ đề), định thời gian mở/đóng đề chính xác, chống thi lại nhiều lần, đồng hồ đếm ngược 45 phút, xuất Word chuẩn lề Sở (Trái 2.5, Phải/Trên/Dưới 1.5), Phiếu tô A4 gọn 1 trang & Chấm điểm định tính HĐTN.</p>
                     <div class="flex flex-wrap gap-4 pt-2">
                         <button onclick="switchTab('lessons')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-600/30 transition">Khám phá bài giảng</button>
                         <button onclick="openQrModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-6 py-3 rounded-xl font-semibold transition flex items-center space-x-2">
@@ -177,7 +181,7 @@
                 <div class="bg-slate-800/50 border border-slate-800 p-6 rounded-2xl">
                     <div class="w-12 h-12 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                     <h3 class="text-lg font-bold text-white mb-2">Đồng bộ Đám mây Vĩnh viễn</h3>
-                    <p class="text-slate-400 text-sm">Dữ liệu lưu trữ an toàn trên Cloud Firestore, phục vụ kiểm tra trực tiếp chuyên môn mọi lúc mọi nơi.</p>
+                    <p class="text-slate-400 text-sm">Kết nối trực tiếp dự án `giangnam146-5a353`, phục vụ kiểm tra chuyên môn trực tiếp mọi lúc mọi nơi.</p>
                 </div>
                 <div class="bg-slate-800/50 border border-slate-800 p-6 rounded-2xl">
                     <div class="w-12 h-12 rounded-xl bg-violet-600/20 text-violet-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-layer-group"></i></div>
@@ -187,7 +191,7 @@
                 <div class="bg-slate-800/50 border border-slate-800 p-6 rounded-2xl">
                     <div class="w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-file-word"></i></div>
                     <h3 class="text-lg font-bold text-white mb-2">Xuất Word 4 Mã Đề & Chấm OMR</h3>
-                    <p class="text-slate-400 text-sm">Xuất 4 mã đề chuẩn Sở (Lề 2.5/1.5), phiếu tô A4 chuẩn 1 trang và chấm đồng loạt nhiều ảnh phiếu tô.</p>
+                    <p class="text-slate-400 text-sm">Xuất 4 mã đề chuẩn Sở (Lề 2.5/1.5), phiếu tô A4 gọn 1 trang và chấm đồng loạt nhiều ảnh phiếu tô.</p>
                 </div>
             </div>
         </div>
@@ -273,7 +277,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Kiểm tra Trắc nghiệm Online theo Chủ đề</h2>
-                    <p id="quizSubtitle" class="text-sm text-slate-400">Học sinh chọn chủ đề học tập đúng khối lớp để làm bài. Mỗi chủ đề chỉ làm 1 lần duy nhất trong thời gian mở đề.</p>
+                    <p id="quizSubtitle" class="text-sm text-slate-400">Học sinh chọn chủ đề học tập đúng khối lớp để làm bài. Mỗi chủ đề làm 1 lần duy nhất trong thời gian mở đề (45 phút).</p>
                 </div>
                 <div id="teacherQuizAction"></div>
             </div>
@@ -313,7 +317,7 @@
                     <p class="text-indigo-400 font-medium">Giáo viên THPT • Trung tâm GDNN-GDTX Gio Linh, Quảng Trị</p>
                 </div>
                 <p class="text-slate-300 text-sm leading-relaxed max-w-xl mx-auto">
-                    Nền tảng <strong>GIANG NAM - DẠY HỌC SỐ</strong> (giangnam146.site) cung cấp không gian học tập số hiện đại, phân loại theo môn học và khối lớp (10, 11, 12) với hệ thống chủ đề chi tiết, định thời gian mở đề và lưu trữ đám mây vĩnh viễn.
+                    Nền tảng <strong>GIANG NAM - DẠY HỌC SỐ</strong> (giangnam146.site) cung cấp không gian học tập số hiện đại, phân loại theo môn học và khối lớp (10, 11, 12) với hệ thống chủ đề chi tiết, định thời gian mở đề và lưu trữ đám mây vĩnh viễn trên Cloud Firestore.
                 </p>
                 <div class="pt-2 flex flex-col sm:flex-row justify-center items-center gap-3">
                     <label for="aboutTeacherFileInput" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition shadow-lg flex items-center space-x-2">
@@ -329,11 +333,16 @@
         <div id="tab-teacher" class="hidden space-y-8">
             <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <span class="text-xs uppercase font-bold tracking-wider text-indigo-400">HỆ THỐNG QUẢN TRỊ GIANGNAM146.SITE</span>
+                    <span class="text-xs uppercase font-bold tracking-wider text-indigo-400">HỆ THỐNG QUẢN TRỊ GIANGNAM146.SITE (giangnam146-5a353)</span>
                     <h2 class="text-2xl font-bold text-white">DASHBOARD GIÁO VIÊN</h2>
                 </div>
-                <div class="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-                    <i class="fa-solid fa-cloud-arrow-up"></i><span id="cloudStatusText">Cloud Firestore Sync Active</span>
+                <div class="flex items-center space-x-3">
+                    <button onclick="forceSyncCloudData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                        <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải lại dữ liệu Đám Mây</span>
+                    </button>
+                    <div class="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                        <i class="fa-solid fa-cloud-arrow-up"></i><span id="cloudStatusText">Cloud Firestore Sync Active</span>
+                    </div>
                 </div>
             </div>
 
@@ -583,8 +592,15 @@
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div id="studentLoginFields" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên học sinh</label>
-                        <input type="text" id="loginStudentName" placeholder="Ví dụ: Nguyễn Văn An" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Chọn lớp học của em</label>
+                        <select id="loginStudentClass" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            <!-- Populated dynamically from cloud classes -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên (Đúng chính xác theo danh sách giáo viên)</label>
+                        <input type="text" id="loginStudentName" required placeholder="Ví dụ: Nguyễn Văn An" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500">
+                        <p class="text-[11px] text-amber-400 mt-1">⚠️ Yêu cầu gõ chính xác họ tên (phân biệt hoa thường, dấu tiếng Việt hoặc ký hiệu A/B nếu trùng tên).</p>
                     </div>
                 </div>
 
@@ -707,8 +723,8 @@
             <h3 class="font-bold text-lg text-white">Thêm học sinh mới</h3>
             <form id="studentForm" onsubmit="handleSaveStudent(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên học sinh</label>
-                    <input type="text" id="studentNameInput" required placeholder="Nguyễn Văn An" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên học sinh (ghi rõ ký hiệu A, B nếu trùng tên)</label>
+                    <input type="text" id="studentNameInput" required placeholder="Ví dụ: Nguyễn Văn An (A)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -716,7 +732,7 @@
                         <select id="studentClassInput" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Chọn Khối (Cực kỳ quan trọng)</label>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Chọn Khối</label>
                         <select id="studentGradeInput" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                             <option value="Khối 10">Khối 10</option>
                             <option value="Khối 11">Khối 11</option>
@@ -724,7 +740,7 @@
                         </select>
                     </div>
                 </div>
-                <p class="text-xs text-indigo-400">Hệ thống sẽ tự động cấp mã đề độc lập (1000-9999) lấy trực tiếp từ kho riêng của đúng khối lớp đó.</p>
+                <p class="text-xs text-indigo-400">Hệ thống sẽ cấp mã đề độc lập (1000-9999) từ kho riêng của đúng khối lớp đó.</p>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-semibold transition">Thêm học sinh</button>
             </form>
         </div>
@@ -798,13 +814,13 @@
                     <div>
                         <label class="block text-xs font-medium text-indigo-300 mb-1"><i class="fa-solid fa-calendar-xmark mr-1"></i> Thời hạn đóng đề (Hạn nộp)</label>
                         <input type="datetime-local" id="quizEndDateInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <p class="text-[10px] text-slate-400 mt-1">Sau thời gian này hệ thống tự động khóa.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Sau thời gian này hệ thống tự động khóa & chấm 0 điểm.</p>
                     </div>
                 </div>
 
                 <!-- Bulk Paste Box for Topics & Questions -->
                 <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl space-y-2">
-                    <label class="block text-xs font-bold text-indigo-300">📥 Nhập nhanh toàn bộ 50 câu hỏi (Dán văn bản có sẵn)</label>
+                    <label class="block text-xs font-bold text-indigo-300">📥 Nhập nhanh toàn bộ câu hỏi (Dán văn bản có sẵn)</label>
                     <p class="text-[11px] text-slate-400 leading-relaxed">Dán nội dung toàn bộ đề vào ô dưới đây, hệ thống sẽ tự động làm sạch tiền tố ('Câu 1:', '1.') và lưu vào kho riêng của chủ đề & khối đã chọn:</p>
                     <textarea id="bulkPasteText" rows="4" placeholder="Ví dụ:&#10;Câu 1: Bản thân em có những điểm mạnh gì?&#10;A. Ý A&#10;B. Ý B&#10;C. Ý C&#10;D. Ý D&#10;Đáp án: B" class="w-full bg-slate-900 border border-indigo-500/50 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-400"></textarea>
                     <button type="button" onclick="parseBulkQuestions()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Tự động phân tích & Thêm vào kho chủ đề</button>
@@ -1122,7 +1138,7 @@
         // Check if deadline has passed for any unsubmitted topic and auto-submit 0 points if needed
         function checkAutoExpiredQuizzes() {
             if (!window.currentUser || window.currentUser.role !== 'student') return;
-            const currentStudent = window.studentsList.find(s => s.name.toLowerCase() === window.currentUser.name.toLowerCase());
+            const currentStudent = window.studentsList.find(s => s.name === window.currentUser.name && s.class === window.currentUser.class);
             const studentGrade = currentStudent ? (currentStudent.grade || 'Khối 10') : (window.currentUser.grade || 'Khối 10');
             const topicsList = GRADE_TOPICS[studentGrade] || GRADE_TOPICS['Khối 10'];
             const now = new Date();
@@ -1131,17 +1147,17 @@
                 const topicKey = `${studentGrade}_${topic}`;
                 const schedule = window.topicSchedules[topicKey] || {};
                 const hasSubmitted = window.submissionsList.some(sub => 
-                    sub.studentName.toLowerCase() === window.currentUser.name.toLowerCase() && 
+                    sub.studentName === window.currentUser.name && 
+                    sub.studentClass === window.currentUser.class &&
                     sub.studentGrade === studentGrade &&
                     sub.topic === topic
                 );
 
                 if (schedule.endDate && now > new Date(schedule.endDate) && !hasSubmitted) {
-                    // Auto-record expired missing submission as 0 points
                     const expiredRecord = {
                         id: 'sub_expired_' + Date.now() + '_' + Math.floor(Math.random()*1000),
                         studentName: window.currentUser.name,
-                        studentClass: currentStudent ? currentStudent.class : '10GDTX',
+                        studentClass: window.currentUser.class,
                         studentGrade: studentGrade,
                         topic: topic,
                         quizCode: currentStudent ? currentStudent.assignedQuizCode : '1001',
@@ -1186,33 +1202,98 @@
             topicEl.innerHTML = topics.map(t => `<option value="${t}">${t}</option>`).join('');
         }
 
-        // Cloud Firestore Synchronization Hook
-        window.initCloudListeners = function() {
+        // Chunked Cloud Storage Engine for Heavy Files (Lessons & Worksheets to prevent 1MB Firestore limit)
+        function saveLargeItemToCloud(collectionName, item) {
+            try {
+                let list = (collectionName === 'lessons' ? window.lessonsList : window.documentsList);
+                list = list.filter(x => x.id !== item.id);
+                list.unshift(item);
+                if (collectionName === 'lessons') window.lessonsList = list;
+                else window.documentsList = list;
+
+                localStorage.setItem('gn_' + collectionName, JSON.stringify(list));
+
+                if (window.db && window.cloudSyncActive) {
+                    const fileData = item.fileData || '';
+                    if (fileData.length > 700000) {
+                        const chunkSize = 700000;
+                        const chunksCount = Math.ceil(fileData.length / chunkSize);
+                        let mainItem = { ...item };
+                        mainItem.fileData = null;
+                        mainItem.hasChunks = true;
+                        mainItem.chunksCount = chunksCount;
+
+                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), mainItem).then(() => {
+                            for (let i = 0; i < chunksCount; i++) {
+                                const chunkData = fileData.substring(i * chunkSize, (i + 1) * chunkSize);
+                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName + '_chunks', `${item.id}_chunk_${i}`), {
+                                    parentId: item.id,
+                                    chunkIndex: i,
+                                    data: chunkData
+                                }).catch(e => {});
+                            }
+                        }).catch(e => {});
+                    } else {
+                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), item).catch(err => {});
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // Enhanced Real-Time & Initial Fetch Cloud Sync Engine (Guarantees immediate loading on mobile and all devices)
+        window.initCloudListeners = async function() {
             if (!window.db) return;
             try {
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'submissions'), (snapshot) => {
-                    let cloudSubs = [];
-                    snapshot.forEach(docSnap => cloudSubs.push(docSnap.data()));
-                    if (cloudSubs.length > 0) {
-                        window.submissionsList = cloudSubs;
-                        localStorage.setItem('gn_submissions', JSON.stringify(window.submissionsList));
-                        refreshActiveViews();
+                const collectionsToSync = ['classes', 'students', 'lessons', 'documents', 'submissions'];
+                for (const colName of collectionsToSync) {
+                    const qRef = collection(window.db, 'artifacts', appId, 'public', 'data', colName);
+                    
+                    // Initial Fetch using getDocs to instantly load on mobile
+                    try {
+                        const snapshot = await getDocs(qRef);
+                        let cloudData = [];
+                        snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
+                        if (cloudData.length > 0) {
+                            if (colName === 'classes') { window.classesList = cloudData; localStorage.setItem('gn_classes', JSON.stringify(cloudData)); }
+                            else if (colName === 'students') { window.studentsList = cloudData; localStorage.setItem('gn_students', JSON.stringify(cloudData)); }
+                            else if (colName === 'lessons') { window.lessonsList = cloudData; localStorage.setItem('gn_lessons', JSON.stringify(cloudData)); }
+                            else if (colName === 'documents') { window.documentsList = cloudData; localStorage.setItem('gn_documents', JSON.stringify(cloudData)); }
+                            else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
+                        }
+                    } catch (fetchErr) {
+                        console.warn(`Fetch notice for ${colName}:`, fetchErr);
                     }
-                }, (err) => console.debug("Cloud Submissions sync notice:", err));
 
-                onSnapshot(collection(window.db, 'artifacts', appId, 'public', 'data', 'students'), (snapshot) => {
-                    let cloudStudents = [];
-                    snapshot.forEach(docSnap => cloudStudents.push(docSnap.data()));
-                    if (cloudStudents.length > 0) {
-                        window.studentsList = cloudStudents;
-                        localStorage.setItem('gn_students', JSON.stringify(window.studentsList));
-                        refreshActiveViews();
-                    }
-                }, (err) => console.debug("Cloud Students sync notice:", err));
+                    // Real-time snapshot listener
+                    onSnapshot(qRef, (snapshot) => {
+                        let cloudData = [];
+                        snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
+                        if (cloudData.length > 0) {
+                            if (colName === 'classes') { window.classesList = cloudData; localStorage.setItem('gn_classes', JSON.stringify(cloudData)); }
+                            else if (colName === 'students') { window.studentsList = cloudData; localStorage.setItem('gn_students', JSON.stringify(cloudData)); }
+                            else if (colName === 'lessons') { window.lessonsList = cloudData; localStorage.setItem('gn_lessons', JSON.stringify(cloudData)); }
+                            else if (colName === 'documents') { window.documentsList = cloudData; localStorage.setItem('gn_documents', JSON.stringify(cloudData)); }
+                            else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
+                            refreshActiveViews();
+                        }
+                    }, (err) => {
+                        console.warn(`Listener error for ${colName}:`, err);
+                    });
+                }
+                refreshActiveViews();
             } catch (e) {
-                console.debug("Cloud listener setup notice:", e);
+                console.warn("Cloud sync init warning:", e);
             }
         };
+
+        function forceSyncCloudData() {
+            if (typeof window.initCloudListeners === 'function') {
+                window.initCloudListeners();
+                showMessage('Đồng bộ thành công', 'Đã tải mới toàn bộ dữ liệu từ đám mây (giangnam146-5a353) vào thiết bị của bạn!');
+            } else {
+                showMessage('Thông báo', 'Đang kết nối đám mây...');
+            }
+        }
 
         function saveToCloud(collectionName, dataList) {
             try {
@@ -1320,7 +1401,17 @@
             }
         }
 
-        function openAuthModal() { document.getElementById('authModal').classList.add('modal-active'); }
+        function openAuthModal() {
+            const classSelect = document.getElementById('loginStudentClass');
+            if (classSelect) {
+                if (window.classesList.length > 0) {
+                    classSelect.innerHTML = window.classesList.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+                } else {
+                    classSelect.innerHTML = `<option value="">Chưa có lớp học nào (Yêu cầu GV tạo lớp trước)</option>`;
+                }
+            }
+            document.getElementById('authModal').classList.add('modal-active');
+        }
         function closeAuthModal() { document.getElementById('authModal').classList.remove('modal-active'); }
         
         function switchAuthRole(role) {
@@ -1358,31 +1449,38 @@
                     showMessage('Lỗi đăng nhập', 'Mật khẩu giáo viên không chính xác!');
                 }
             } else {
-                const nameEl = document.getElementById('loginStudentName');
-                const name = nameEl ? nameEl.value.trim() : '';
-                if (!name) { showMessage('Thông báo', 'Vui lòng nhập tên học sinh!'); return; }
+                const selectedClass = document.getElementById('loginStudentClass').value;
+                const name = document.getElementById('loginStudentName').value.trim();
                 
-                let studentRecord = window.studentsList.find(s => s.name.toLowerCase() === name.toLowerCase());
+                if (!selectedClass) {
+                    showMessage('Thông báo', 'Vui lòng chọn lớp học!');
+                    return;
+                }
+                if (!name) {
+                    showMessage('Thông báo', 'Vui lòng nhập họ và tên học sinh!');
+                    return;
+                }
+                
+                // Strict exact match check against pre-created student list (case-sensitive & diacritic-sensitive)
+                const studentRecord = window.studentsList.find(s => s.class === selectedClass && s.name === name);
                 if (!studentRecord) {
-                    const defaultClass = window.classesList.length > 0 ? window.classesList[0].name : '10GDTX1';
-                    studentRecord = {
-                        id: 's_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-                        name: name,
-                        class: defaultClass,
-                        grade: 'Khối 10',
-                        assignedQuizCode: String(Math.floor(1000 + Math.random() * 9000))
-                    };
-                    window.studentsList.unshift(studentRecord);
-                    saveToCloud('students', window.studentsList);
+                    showMessage('Đăng nhập thất bại', 'Họ và tên hoặc lớp học không khớp với danh sách do giáo viên tạo!\n\nLưu ý: Hệ thống yêu cầu gõ chính xác từng ký tự (phân biệt hoa thường, dấu tiếng Việt và ký hiệu A/B nếu trùng tên). Vui lòng kiểm tra lại.');
+                    return;
                 }
 
-                window.currentUser = { role: 'student', name: studentRecord.name, class: studentRecord.class, grade: studentRecord.grade || 'Khối 10', assignedQuizCode: studentRecord.assignedQuizCode };
+                window.currentUser = { 
+                    role: 'student', 
+                    name: studentRecord.name, 
+                    class: studentRecord.class, 
+                    grade: studentRecord.grade || 'Khối 10', 
+                    assignedQuizCode: studentRecord.assignedQuizCode 
+                };
                 try { localStorage.setItem('gn_current_user', JSON.stringify(window.currentUser)); } catch (e) {}
                 closeAuthModal();
                 updateAuthHeader();
                 checkAutoExpiredQuizzes();
                 switchTab('quiz');
-                showMessage('Đăng nhập thành công', `Chào mừng em ${name} (${studentRecord.grade})! Hệ thống đã cấp riêng mã đề tráo đổi [${studentRecord.assignedQuizCode}] từ kho chủ đề của đúng khối.`);
+                showMessage('Đăng nhập thành công', `Chào mừng em ${studentRecord.name} (${studentRecord.class} - ${studentRecord.grade})!`);
             }
         }
 
@@ -1483,7 +1581,17 @@
             document.getElementById('lessonViewerModal').classList.add('modal-active');
 
             try {
-                if (!lesson.fileData) {
+                let fileData = lesson.fileData;
+                if (!fileData && lesson.hasChunks) {
+                    let fullData = "";
+                    for (let i = 0; i < lesson.chunksCount; i++) {
+                        let chunk = localStorage.getItem(`gn_chunk_${lesson.id}_${i}`);
+                        if (chunk) fullData += chunk;
+                    }
+                    if (fullData) fileData = fullData;
+                }
+
+                if (!fileData) {
                     if (container) container.innerHTML = `
                         <div class="text-center space-y-4 p-8 bg-slate-900 rounded-2xl border border-slate-800 max-w-lg mx-auto">
                             <div class="w-16 h-16 bg-indigo-600/20 text-indigo-400 rounded-3xl mx-auto flex items-center justify-center text-3xl"><i class="fa-solid fa-file-lines"></i></div>
@@ -1495,9 +1603,9 @@
                     return;
                 }
 
-                const mimeMatch = lesson.fileData.match(/^data:(.*?);base64,/);
+                const mimeMatch = fileData.match(/^data:(.*?);base64,/);
                 const mime = mimeMatch ? mimeMatch[1] : '';
-                const base64Content = lesson.fileData.split(',')[1];
+                const base64Content = fileData.split(',')[1];
                 if (!base64Content) throw new Error("Invalid file data");
 
                 const binaryString = atob(base64Content);
@@ -1508,9 +1616,9 @@
                 const fileName = (lesson.fileName || lesson.file || '').toLowerCase();
 
                 if (mime === 'application/pdf' || fileName.endsWith('.pdf')) {
-                    if (container) container.innerHTML = `<iframe src="${lesson.fileData}" class="w-full h-full rounded-2xl border-0 bg-white"></iframe>`;
+                    if (container) container.innerHTML = `<iframe src="${fileData}" class="w-full h-full rounded-2xl border-0 bg-white"></iframe>`;
                 } else if (mime.startsWith('image/') || fileName.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                    if (container) container.innerHTML = `<img src="${lesson.fileData}" class="max-w-full max-h-full object-contain rounded-xl shadow-lg">`;
+                    if (container) container.innerHTML = `<img src="${fileData}" class="max-w-full max-h-full object-contain rounded-xl shadow-lg">`;
                 } else if (fileName.endsWith('.docx') || mime.includes('wordprocessingml')) {
                     if (typeof mammoth !== 'undefined') {
                         const result = await mammoth.convertToHtml({ arrayBuffer: bytes.buffer });
@@ -1552,9 +1660,19 @@
         function downloadLesson(id) {
             const lesson = [...window.lessonsList, ...window.documentsList].find(l => l.id === id);
             if (!lesson) return;
-            if (lesson.fileData) {
+            let fileData = lesson.fileData;
+            if (!fileData && lesson.hasChunks) {
+                let fullData = "";
+                for (let i = 0; i < lesson.chunksCount; i++) {
+                    let chunk = localStorage.getItem(`gn_chunk_${lesson.id}_${i}`);
+                    if (chunk) fullData += chunk;
+                }
+                if (fullData) fileData = fullData;
+            }
+
+            if (fileData) {
                 const a = document.createElement('a');
-                a.href = lesson.fileData;
+                a.href = fileData;
                 a.download = lesson.fileName || lesson.file || 'tailieu_giangnam.pdf';
                 document.body.appendChild(a);
                 a.click();
@@ -1625,12 +1743,12 @@
             if (!container) return;
             
             if (window.currentUser && window.currentUser.role === 'student') {
-                const currentStudent = window.studentsList.find(s => s.name.toLowerCase() === window.currentUser.name.toLowerCase());
+                const currentStudent = window.studentsList.find(s => s.name === window.currentUser.name && s.class === window.currentUser.class);
                 const assignedCode = currentStudent ? currentStudent.assignedQuizCode : (window.currentUser.assignedQuizCode || '4821');
                 const studentGrade = currentStudent ? (currentStudent.grade || 'Khối 10') : (window.currentUser.grade || 'Khối 10');
                 const topicsList = GRADE_TOPICS[studentGrade] || GRADE_TOPICS['Khối 10'];
 
-                if (subtitle) subtitle.innerHTML = `Học sinh <b>${window.currentUser.name}</b> (${studentGrade}) chọn Chủ đề học tập đúng thời hạn để làm bài. Mỗi chủ đề chỉ làm 1 lần duy nhất (45 phút).`;
+                if (subtitle) subtitle.innerHTML = `Học sinh <b>${window.currentUser.name}</b> (${studentGrade} - Lớp ${window.currentUser.class}) chọn Chủ đề học tập đúng thời hạn để làm bài. Mỗi chủ đề làm 1 lần duy nhất (45 phút).`;
 
                 if (window.activeTakingTopicKey) {
                     const topicName = window.activeTakingTopicKey;
@@ -1707,14 +1825,16 @@
                                 const isExpired = endTime && now > endTime;
 
                                 const hasSubmitted = window.submissionsList.some(sub => 
-                                    sub.studentName.toLowerCase() === window.currentUser.name.toLowerCase() && 
+                                    sub.studentName === window.currentUser.name && 
+                                    sub.studentClass === window.currentUser.class &&
                                     sub.studentGrade === studentGrade &&
                                     sub.topic === topic
                                 );
 
                                 if (hasSubmitted) {
                                     const subRecord = window.submissionsList.find(sub => 
-                                        sub.studentName.toLowerCase() === window.currentUser.name.toLowerCase() && 
+                                        sub.studentName === window.currentUser.name && 
+                                        sub.studentClass === window.currentUser.class &&
                                         sub.studentGrade === studentGrade &&
                                         sub.topic === topic
                                     );
@@ -1724,6 +1844,7 @@
                                                 <span class="px-3 py-1 rounded-full bg-indigo-600 text-white text-xs font-bold">${studentGrade}</span>
                                                 <h3 class="font-bold text-lg text-white mt-1">${topic}</h3>
                                                 <p class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Đã hoàn thành (Điểm: ${subRecord.score})</p>
+                                                <p class="text-[11px] text-slate-400">Đã nộp bài và ẩn để tránh làm lại nhiều lần.</p>
                                             </div>
                                             <button onclick="showStudentResultCardFromStorage('${subRecord.id}')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow">Xem lại phiếu kết quả</button>
                                         </div>
@@ -1761,7 +1882,7 @@
                                                     ${schedule.endDate ? `<span class="text-[10px] text-amber-300 font-mono"><i class="fa-solid fa-hourglass-half mr-1"></i>Hạn: ${new Date(schedule.endDate).toLocaleDateString('vi-VN')}</span>` : ''}
                                                 </div>
                                                 <h3 class="font-bold text-lg text-white mt-1">${topic}</h3>
-                                                <p class="text-xs text-slate-400">Thời gian làm bài: <b>45 phút</b> (Chỉ làm 1 lần)</p>
+                                                <p class="text-xs text-slate-400">Thời gian làm bài: <b>45 phút</b> (Chỉ làm 1 lần duy nhất)</p>
                                             </div>
                                             <button onclick="window.activeTakingTopicKey = '${topic}'; renderQuizzes();" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold transition shadow">Vào làm bài ngay</button>
                                         </div>
@@ -1772,7 +1893,7 @@
                     `;
                 }
             } else if (window.currentUser && window.currentUser.role === 'teacher') {
-                if (subtitle) subtitle.innerText = "Giao diện Giáo viên: Quản lý ngân hàng câu hỏi, lịch định thời gian mở/đóng đề và theo dõi bài nộp của học sinh.";
+                if (subtitle) subtitle.innerText = "Giao diện Giáo viên: Quản lý ngân hàng câu hỏi, lịch định thời gian mở/đóng đề theo từng khối & chủ đề và theo dõi bài nộp.";
                 
                 let allTopicCards = [];
                 ['Khối 10', 'Khối 11', 'Khối 12'].forEach(grade => {
@@ -1814,7 +1935,7 @@
                     <div class="col-span-full bg-slate-800/40 border border-slate-700 rounded-3xl p-8 text-center space-y-4">
                         <div class="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center text-xl"><i class="fa-solid fa-user-lock"></i></div>
                         <h3 class="font-bold text-lg text-white">Yêu cầu đăng nhập</h3>
-                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Em hãy bấm đăng nhập ở góc trên bên phải để chọn chủ đề làm bài theo đúng khối lớp.</p>
+                        <p class="text-xs text-slate-400 max-w-sm mx-auto">Em hãy bấm đăng nhập ở góc trên bên phải, chọn đúng lớp và nhập đúng họ tên theo danh sách của giáo viên để làm bài.</p>
                         <button onclick="openAuthModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-xl text-xs font-semibold">Đăng nhập ngay</button>
                     </div>
                 `;
@@ -1900,8 +2021,7 @@
             const container = document.getElementById('quizContainer');
             if (!container) return;
 
-            // Generate compact 5-column answers table for 50 questions fitting 1 page A4 Unicode 12pt
-            let questionsHtml = '<table style="width:100%; border-collapse: collapse; font-size: 10pt; text-align: center; margin-bottom: 4px;">';
+            let questionsHtml = '<table style="width:100%; border-collapse: collapse; font-size: 8pt; text-align: center; margin-bottom: 2px;">';
             questionsHtml += '<tr style="background:#f2f2f2; font-weight:bold;"><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td></tr>';
             
             for (let row = 0; row < 10; row++) {
@@ -1922,15 +2042,15 @@
             questionsHtml += '</table>';
 
             container.innerHTML = `
-                <div id="studentOmrReportCard" class="bg-white text-slate-900 p-6 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-2 text-xs" style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15;">
-                    <div class="text-center border-b pb-2">
+                <div id="studentOmrReportCard" class="bg-white text-slate-900 p-4 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-1.5 text-xs" style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15;">
+                    <div class="text-center border-b pb-1">
                         <p class="font-bold text-xs uppercase" style="font-size: 11pt;">SỞ GIÁO DỤC VÀ ĐÀO TẠO QUẢNG TRỊ</p>
                         <p class="font-bold text-xs uppercase" style="font-size: 11pt;">TRUNG TÂM GDNN-GDTX GIO LINH</p>
-                        <h2 class="font-extrabold text-sm mt-1 uppercase text-indigo-700" style="font-size: 13pt;">PHIẾU KẾT QUẢ & ĐÁP ÁN TRẮC NGHIỆM</h2>
+                        <h2 class="font-extrabold text-sm mt-1 uppercase text-indigo-700" style="font-size: 12pt;">PHIẾU KẾT QUẢ & ĐÁP ÁN TRẮC NGHIỆM</h2>
                         <p class="text-[11px] text-slate-600">Chủ đề: ${sub.topic} • Khối: ${sub.studentGrade}</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2 rounded-xl border" style="font-size: 12pt;">
+                    <div class="grid grid-cols-2 gap-1 text-[11px] bg-slate-50 p-2 rounded-xl border" style="font-size: 12pt;">
                         <div><b>Họ và tên học sinh:</b> ${sub.studentName}</div>
                         <div><b>Lớp & Khối:</b> ${sub.studentClass} (${sub.studentGrade})</div>
                         <div><b>Mã đề thi:</b> <span class="font-mono font-bold text-emerald-600">${sub.quizCode}</span></div>
@@ -1938,28 +2058,28 @@
                     </div>
 
                     <div class="bg-indigo-50 border border-indigo-200 p-2 rounded-xl text-center space-y-0.5" style="font-size: 12pt;">
-                        <div class="text-base font-black text-indigo-700">${sub.score} điểm</div>
+                        <div class="text-sm font-black text-indigo-700">${sub.score} điểm</div>
                         <div class="text-xs font-bold text-slate-800">Đánh giá môn HĐTN: <span class="text-emerald-600">${sub.evaluation}</span></div>
                         <p class="text-[11px] text-slate-600">Số câu đúng: <b>${sub.correctCount} / ${sub.totalQuestions}</b></p>
                     </div>
 
-                    <div class="space-y-1">
-                        <h4 class="font-bold text-[11px] text-slate-700 uppercase" style="font-size: 11pt;">Chi tiết câu trả lời của học sinh:</h4>
+                    <div class="space-y-0.5">
+                        <h4 class="font-bold text-[11px] text-slate-700 uppercase" style="font-size: 11pt;">Chi tiết câu trả lời của học sinh (50 câu):</h4>
                         ${questionsHtml}
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-2 text-center text-[11px]" style="font-size: 12pt;">
+                    <div class="grid grid-cols-2 gap-4 pt-1 text-center text-[11px]" style="font-size: 12pt;">
                         <div>
                             <p class="font-bold">HỌC SINH KÝ TÊN</p>
                             <p class="text-[9px] text-slate-500">(Ký và ghi rõ họ tên)</p>
-                            <div class="h-6"></div>
-                            <p class="font-bold border-t pt-1 inline-block min-w-[120px]">${sub.studentName}</p>
+                            <div class="h-4"></div>
+                            <p class="font-bold border-t pt-0.5 inline-block min-w-[120px]">${sub.studentName}</p>
                         </div>
                         <div>
                             <p class="font-bold">GIÁO VIÊN GIẢNG DẠY</p>
                             <p class="text-[9px] text-slate-500">(Ký và ghi rõ họ tên)</p>
-                            <div class="h-6"></div>
-                            <p class="font-bold border-t pt-1 inline-block min-w-[120px]">Thầy Nguyễn Giang Nam</p>
+                            <div class="h-4"></div>
+                            <p class="font-bold border-t pt-0.5 inline-block min-w-[120px]">Thầy Nguyễn Giang Nam</p>
                         </div>
                     </div>
 
@@ -1981,7 +2101,7 @@
                     @page { size: A4 portrait; margin: 1cm; }
                     body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15; color: #000; }
                     table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #000; padding: 1px 3px; text-align: center; font-size: 10pt; }
+                    th, td { border: 1px solid #000; padding: 1px 2px; text-align: center; font-size: 9pt; }
                 </style>
                 </head>
                 <body>${cardHtml}</body></html>
@@ -2619,14 +2739,12 @@
                     fileData: event.target.result
                 };
 
-                window.lessonsList = window.lessonsList.filter(x => x.id !== newLesson.id);
-                window.lessonsList.unshift(newLesson);
-                saveToCloud('lessons', window.lessonsList);
+                saveLargeItemToCloud('lessons', newLesson);
 
                 document.getElementById('lessonForm').reset();
                 closeAddLessonModal();
                 renderLessons();
-                showMessage('Thành công', 'Đã lưu bài học và đồng bộ lên đám mây vĩnh viễn!');
+                showMessage('Thành công', 'Đã lưu bài học và đồng bộ lên đám mây vĩnh viễn (giangnam146-5a353)!');
             };
             reader.readAsDataURL(file);
         }
@@ -2662,14 +2780,12 @@
                     fileData: event.target.result
                 };
 
-                window.documentsList = window.documentsList.filter(x => x.id !== newDoc.id);
-                window.documentsList.unshift(newDoc);
-                saveToCloud('documents', window.documentsList);
+                saveLargeItemToCloud('documents', newDoc);
 
                 document.getElementById('worksheetForm').reset();
                 closeAddWorksheetModal();
                 renderDocuments();
-                showMessage('Thành công', 'Tài liệu đã được tải lên và đồng bộ đám mây vĩnh viễn!');
+                showMessage('Thành công', 'Tài liệu đã được tải lên và đồng bộ đám mây vĩnh viễn (giangnam146-5a353)!');
             };
             reader.readAsDataURL(file);
         }
@@ -2779,7 +2895,7 @@
             localStorage.setItem('gn_topic_schedules', JSON.stringify(window.topicSchedules));
 
             closeQuizBuilderModal();
-            showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn thành công!`);
+            showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
     </script>
 </body>
