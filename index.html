@@ -3012,5 +3012,64 @@ async function loadSubmissionsFromCloud() {
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
     </script>
+    <script>
+// --- ĐOẠN MÃ ĐỒNG BỘ ĐÁM MÂY TỰ ĐỘNG (AN TOÀN TUYỆT ĐỐI) ---
+async function saveToCloud(collectionName, dataList) {
+    try {
+        localStorage.setItem('gn_' + collectionName, JSON.stringify(dataList));
+        if (window.db && typeof setDoc !== 'undefined' && typeof doc !== 'undefined') {
+            for (const item of dataList) {
+                const itemId = item.id || ('sub_' + (item.studentId || Date.now()) + '_' + Math.floor(Math.random() * 1000));
+                await setDoc(doc(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', collectionName, itemId), item, { merge: true });
+            }
+            console.log("Đã tự động đẩy dữ liệu lên đám mây thành công!");
+        }
+    } catch (e) {
+        console.warn("Lỗi đồng bộ mây:", e);
+    }
+}
+
+async function loadSubmissionsFromCloud() {
+    if (!window.db || typeof getDocs === 'undefined' || typeof collection === 'undefined') {
+        alert("Hệ thống đám mây chưa sẵn sàng trên thiết bị này!");
+        return;
+    }
+    try {
+        const querySnapshot = await getDocs(collection(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', 'submissions'));
+        const cloudSubmissions = [];
+        querySnapshot.forEach((docSnap) => {
+            cloudSubmissions.push(docSnap.data());
+        });
+        
+        if (cloudSubmissions.length > 0) {
+            window.submissionsList = cloudSubmissions;
+            localStorage.setItem('gn_submissions', JSON.stringify(cloudSubmissions));
+            
+            if (typeof renderSubmissions === 'function') {
+                renderSubmissions();
+            } else if (typeof updateSubmissionsTable === 'function') {
+                updateSubmissionsTable();
+            } else {
+                location.reload();
+            }
+            
+            if (typeof showMessage === 'function') {
+                showMessage('Đồng bộ thành công', 'Đã tải ' + cloudSubmissions.length + ' bài nộp từ đám mây (giangnam146-5a353) về máy!');
+            } else {
+                alert('Đã tải thành công ' + cloudSubmissions.length + ' bài nộp từ đám mây về máy!');
+            }
+        } else {
+            if (typeof showMessage === 'function') {
+                showMessage('Đồng bộ', 'Đám mây hiện tại chưa ghi nhận bài nộp nào.');
+            } else {
+                alert('Đám mây hiện tại chưa ghi nhận bài nộp nào.');
+            }
+        }
+    } catch (e) {
+        console.error("Lỗi tải đám mây:", e);
+        alert('Không thể tải dữ liệu: ' + e.message);
+    }
+}
+</script>
 </body>
 </html>
