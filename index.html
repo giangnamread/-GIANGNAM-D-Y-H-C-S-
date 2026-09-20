@@ -3316,6 +3316,15 @@ function resetBaiLam(docId) {
             setTimeout(() => { if (typeof db !== 'undefined') loadDanhSachBaiNop(); }, 1000);
         });
     </script>
+<!-- Các phần mã nguồn cũ phía trên của website giangnam146.site -->
+        ...
+        </div>
+    </div>
+</div>
 
-</html> <!-- Dòng 3245 cũ nằm ở đây -->
+<!-- DÁN ĐOẠN MÃ MỘT DÒNG VÀO ĐÂY (NGAY TRƯỚC THẺ </html>) -->
+<div class="container my-4" style="font-family: Arial, sans-serif;"><div class="card shadow-sm p-4"><h3 class="mb-3" style="color: #0d6efd; font-weight: bold;">Quản lý Kết quả & Cấp quyền Làm lại Bài kiểm tra</h3><div class="table-responsive"><table class="table table-bordered table-striped text-center align-middle" style="font-size: 14px;"><thead style="background-color: #f8f9fa;"><tr><th>Họ và tên học sinh</th><th>Lớp</th><th>Chủ đề</th><th>Điểm số</th><th>Trạng thái</th><th>Thao tác quản lý</th></tr></thead><tbody id="bangQuanLyHocSinh"><tr><td colspan="6" class="text-center">Đang tải dữ liệu từ đám mây...</td></tr></tbody></table></div></div></div><script>function loadDanhSachBaiNop(){const tbody=document.getElementById('bangQuanLyHocSinh');db.collection("bai_lam_hoc_sinh").get().then((querySnapshot)=>{tbody.innerHTML="";if(querySnapshot.empty){tbody.innerHTML="<tr><td colspan='6' class='text-center'>Chưa có bản ghi nào.</td></tr>";return;}querySnapshot.forEach((doc)=>{let data=doc.data();let docId=doc.id;let tr=document.createElement('tr');tr.innerHTML=`<td style="font-weight: bold; text-align: left; padding-left: 15px;">${data.ten_hs||'Học sinh'}</td><td>${data.lop||'10E'}</td><td>${data.chu_de||'Chủ đề 1'}</td><td><strong style="color: #a94442;">${data.diem!==null?data.diem+' điểm':'Chưa có'}</strong></td><td><span class="badge bg-success" style="padding: 5px 10px; background-color: #198754; color: white; border-radius: 4px;">${data.trang_thai==='chua_lam'?'Chưa làm':'Đã hoàn thành'}</span></td><td><button onclick="resetBaiLamHocSinh('${docId}')" class="btn btn-danger btn-sm" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;"><i class="fas fa-redo"></i> Reset</button><button onclick="xoaBaiNop('${docId}')" class="btn btn-dark btn-sm" style="background-color: #343a40; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;"><i class="fas fa-trash"></i> Xóa</button></td>`;tbody.appendChild(tr);});});}function resetBaiLamHocSinh(docId){if(confirm("Thầy có chắc chắn muốn mở lại bài làm (reset) cho học sinh này không?")){db.collection("bai_lam_hoc_sinh").doc(docId).update({trang_thai:"chua_lam",diem:null,da_nop:false}).then(()=>{alert("Đã reset và cấp quyền làm lại thành công!");loadDanhSachBaiNop();});}}function xoaBaiNop(docId){if(confirm("Thầy có chắc chắn muốn XÓA VĨNH VIỄN bài nộp này khỏi hệ thống không?")){db.collection("bai_lam_hoc_sinh").doc(docId).delete().then(()=>{alert("Đã xóa bài nộp thành công!");loadDanhSachBaiNop();});}}window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{if(typeof db!=='undefined')loadDanhSachBaiNop();},1000);});</script>
+
+</html>
+
 
