@@ -3078,4 +3078,169 @@ function resetBaiLam(docId) {
         }
     </script>
 </body>
-</html>
+    <!-- ================= KHUNG PHIẾU KẾT QUẢ ================= -->
+<div id="phieuKetQua" class="container bg-white p-4 rounded shadow-sm" style="max-width: 800px; margin: auto; color: #000; font-family: Arial, sans-serif;">
+    
+    <!-- Tiêu đề cơ quan -->
+    <div class="text-center mb-3">
+        <h5 style="font-weight: bold; font-size: 14px; margin-bottom: 2px;">SỞ GIÁO DỤC VÀ ĐÀO TẠO QUẢNG TRỊ</h5>
+        <h6 style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">TRUNG TÂM GDNN-GDTX GIO LINH</h6>
+        <h4 style="font-weight: bold; font-size: 18px; color: #0d6efd; margin-bottom: 5px;">PHIẾU KẾT QUẢ & ĐÁP ÁN TRẮC NGHIỆM</h4>
+        <p style="font-size: 12px; color: #555;">Chủ đề: Chủ đề 1 • Khối: Khối 10</p>
+    </div>
+
+    <!-- Thông tin học sinh -->
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; border-radius: 5px; background-color: #f8f9fa; font-size: 13px;">
+        <div class="row" style="display: flex; flex-wrap: wrap;">
+            <div style="flex: 0 0 50%;"><strong>Họ và tên học sinh:</strong> <span id="hsTen">Nguyễn Thị Lan Anh</span></div>
+            <div style="flex: 0 0 50%;"><strong>Lớp & Khối:</strong> <span id="hsLop">10E (Khối 10)</span></div>
+            <div style="flex: 0 0 50%; margin-top: 5px;"><strong>Mã đề thi:</strong> <span id="maDe">4801</span></div>
+            <div style="flex: 0 0 50%; margin-top: 5px;"><strong>Thời gian nộp:</strong> <span id="thoiGianNop">11:22:44 20/9/2026</span></div>
+        </div>
+    </div>
+
+    <!-- Khung hiển thị điểm -->
+    <div style="text-center; border: 1px solid #bce8f1; padding: 12px; margin-bottom: 15px; border-radius: 5px; background-color: #d9edf7; text-align: center;">
+        <h3 style="color: #a94442; font-weight: bold; font-size: 24px; margin-bottom: 5px;" id="diemSo">5.2 điểm</h3>
+        <p style="margin-bottom: 3px; font-size: 14px;">Đánh giá môn HĐTN: <span style="color: #3c763d; font-weight: bold;">Đạt</span></p>
+        <small style="color: #555; font-size: 12px;">Số câu đúng: <span id="soCauDung">26 / 50</span></small>
+    </div>
+
+    <!-- Bảng chi tiết 50 câu trả lời -->
+    <div class="table-responsive">
+        <table class="table table-bordered text-center table-sm" style="width: 100%; border-collapse: collapse; font-size: 12px;" border="1">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th>C</th><th>Chọn</th><th>Đ/S</th>
+                    <th>C</th><th>Chọn</th><th>Đ/S</th>
+                    <th>C</th><th>Chọn</th><th>Đ/S</th>
+                    <th>C</th><th>Chọn</th><th>Đ/S</th>
+                    <th>C</th><th>Chọn</th><th>Đ/S</th>
+                </tr>
+            </thead>
+            <tbody id="bangChiTietCauHoi">
+                <!-- Dữ liệu mô phỏng 10 hàng x 5 cột = 50 câu chuẩn theo ảnh mẫu của thầy -->
+                <tr>
+                    <td>1</td><td>A</td><td style="color:green; font-weight:bold;">Đ</td>
+                    <td>11</td><td>A</td><td style="color:green; font-weight:bold;">Đ</td>
+                    <td>21</td><td>B</td><td style="color:green; font-weight:bold;">Đ</td>
+                    <td>31</td><td>A</td><td style="color:green; font-weight:bold;">Đ</td>
+                    <td>41</td><td>D</td><td style="color:red; font-weight:bold;">S</td>
+                </tr>
+                <tr>
+                    <td>2</td><td>A</td><td style="color:green; font-weight:bold;">Đ</td>
+                    <td>12</td><td>B</td><td style="color:red; font-weight:bold;">S</td>
+                    <td>22</td><td>D</td><td style="color:red; font-weight:bold;">S</td>
+                    <td>32</td><td>B</td><td style="color:red; font-weight:bold;">S</td>
+                    <td>42</td><td>D</td><td style="color:red; font-weight:bold;">S</td>
+                </tr>
+                <!-- (Thầy có thể lặp tiếp các câu 3 đến 50 theo cấu trúc chuẩn trong mã nguồn của thầy) -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phần chữ ký -->
+    <div style="display: flex; margin-top: 30px; font-size: 13px;">
+        <div style="flex: 1; text-align: center;">
+            <p style="font-weight: bold; margin-bottom: 60px;">HỌC SINH KÝ TÊN<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Ký và ghi rõ họ tên)</span></p>
+        </div>
+        <div style="flex: 1; text-align: center;">
+            <p style="font-weight: bold; margin-bottom: 60px;">GIÁO VIÊN GIẢNG DẠY<br><span style="font-weight: normal; font-style: italic; font-size: 11px;">(Ký và ghi rõ họ tên)</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- ================= THANH CÔNG CỤ (IN & TẢI ẢNH) ================= -->
+<div class="text-center my-4 action-bar" style="text-align: center; margin: 20px 0;">
+    <button onclick="inPhieuKetQua()" class="btn btn-primary" style="background-color: #0d6efd; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+        <i class="fas fa-print"></i> In trực tiếp / Lưu PDF
+    </button>
+    <button onclick="taiAnhPhieuKetQua()" class="btn btn-success" style="background-color: #198754; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+        <i class="fas fa-image"></i> Tải ảnh Phiếu kết quả
+    </button>
+      </script>
+    <!-- Nhúng thư viện html2canvas để hỗ trợ tải ảnh phiếu kết quả -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    // 1. Hàm in trực tiếp hoặc lưu thành file PDF qua hộp thoại máy in trình duyệt
+    function inPhieuKetQua() {
+        window.print();
+    }
+
+    // 2. Hàm chụp ảnh phiếu kết quả và tải về máy tính/điện thoại định dạng PNG
+    function taiAnhPhieuKetQua() {
+        const phieuElement = document.getElementById('phieuKetQua');
+        html2canvas(phieuElement, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            const tenHS = document.getElementById('hsTen').innerText.replace(/\s+/g, '_');
+            link.download = 'Phieu_Ket_Qua_' + tenHS + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    // 3. Hàm lưu lịch sử cố định lên Firebase Firestore khi học sinh nộp bài
+    function luuLichSuVinhVien(thongTinHS) {
+        db.collection("lich_su_nop_bai").add({
+            ten_hs: thongTinHS.ten,
+            lop: thongTinHS.lop,
+            chu_de: thongTinHS.chuDe,
+            ma_de: thongTinHS.maDe,
+            diem: thongTinHS.diem,
+            so_cau_dung: thongTinHS.soCauDung,
+            chi_tiet_bai: thongTinHS.chiTiet,
+            thoi_gian_nop: firebase.firestore.FieldValue.serverTimestamp() // Lưu mốc thời gian cố định chính xác
+        })
+        .then(() => {
+            console.log("Đã lưu kết quả vào kho lưu trữ cố định thành công!");
+        })
+        .catch((error) => {
+            console.error("Lỗi khi lưu lịch sử: ", error);
+        });
+    }
+
+    // 4. Hàm dành cho Giáo viên: Reset bài làm cho bất kỳ học sinh nào trên Dashboard
+    function resetBaiLamHocSinh(docId) {
+        if (confirm("Thầy có chắc chắn muốn mở lại bài làm cho học sinh này không?")) {
+            db.collection("bai_lam_hoc_sinh").doc(docId).update({
+                trang_thai: "chua_lam",
+                diem: null,
+                da_nop: false
+            })
+            .then(() => {
+                alert("Đã reset và mở khóa bài làm thành công!");
+                location.reload(); // Tải lại bảng quản lý của giáo viên
+            })
+            .catch((error) => {
+                console.error("Lỗi khi reset: ", error);
+                alert("Không thể reset, vui lòng kiểm tra lại kết nối!");
+            });
+        }
+    }
+</script>
+
+<!-- CSS cấu hình riêng khi In ấn (Giúp chỉ in đúng tờ phiếu, ẩn menu web xung quanh) -->
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #phieuKetQua, #phieuKetQua * {
+        visibility: visible;
+    }
+    #phieuKetQua {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+    }
+    .action-bar {
+        display: none !important;
+    }
+}
+</style>
+</div>
+    </html>
+
