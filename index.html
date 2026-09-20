@@ -2635,7 +2635,7 @@
             document.body.appendChild(a);
             try { a.click(); } catch (e) { window.open(url, '_blank'); }
             setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
-            showMessage('Sao lưu', 'Đã khởi tạo tải file sao lưu (.JSON)!');
+            showMessage('Sao lưu', 'Đã khởi tạo tải file sao lưu (.JSON)! Kiểm tra thư mục Tải về (Downloads) trên thiết bị.');
         }
 
         function importBackupJsonFile() {
@@ -3316,6 +3316,88 @@ function resetBaiLam(docId) {
             setTimeout(() => { if (typeof db !== 'undefined') loadDanhSachBaiNop(); }, 1000);
         });
     </script>
+// 1. Khởi tạo kết nối Firebase toàn cục cho mọi thiết bị
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSy...", // Giữ nguyên apiKey của dự án thầy
+    authDomain: "giangnam146-5a353.firebaseapp.com",
+    projectId: "giangnam146-5a353",
+    storageBucket: "giangnam146-5a353.appspot.com",
+    messagingSenderId: "...",
+    appId: "..."
+};
+
+// Khởi tạo và ép buộc bật chế độ đồng bộ đám mây
+try {
+    const app = initializeApp(firebaseConfig);
+    window.db = getFirestore(app);
+    window.cloudSyncActive = true;
+    console.log("Kết nối Firebase thành công tuyệt đối!");
+} catch (err) {
+    console.error("Lỗi khởi tạo Firebase:", err);
+    window.cloudSyncActive = false;
+}
+
+// 2. Hàm lưu và đẩy dữ liệu tự động lên đám mây khi học sinh nộp bài
+async function saveToCloud(collectionName, dataList) {
+    try {
+        // Luôn lưu dự phòng an toàn trên thiết bị của học sinh
+        localStorage.setItem('gn_' + collectionName, JSON.stringify(dataList));
+        
+        // Đẩy dữ liệu trực tiếp lên kho Firestore trên mây
+        if (window.db) {
+            for (const item of dataList) {
+                // Tạo ID định danh duy nhất cho mỗi bài nộp của học sinh
+                const itemId = item.id || ('sub_' + (item.studentId || Date.now()) + '_' + Math.floor(Math.random() * 1000));
+                
+                await setDoc(doc(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', collectionName, itemId), item, { merge: true });
+            }
+            console.log("Đã đồng bộ bài nộp lên đám mây thành công!");
+        } else {
+            console.warn("Chưa kết nối được cơ sở dữ liệu mây.");
+        }
+    } catch (e) {
+        console.error("Lỗi đẩy dữ liệu lên mây:", e);
+    }
+}
+
+// 3. Hàm tải dữ liệu về máy giáo viên (Gắn vào nút "Tải lại dữ liệu Đám Mây")
+async function loadSubmissionsFromCloud() {
+    if (!window.db) {
+        alert("Chưa kết nối được đám mây!");
+        return;
+    }
+    try {
+        const querySnapshot = await getDocs(collection(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', 'submissions'));
+        const cloudSubmissions = [];
+        querySnapshot.forEach((doc) => {
+            cloudSubmissions.push(doc.data());
+        });
+        
+        if (cloudSubmissions.length > 0) {
+            window.submissionsList = cloudSubmissions;
+            localStorage.setItem('gn_submissions', JSON.stringify(cloudSubmissions));
+            
+            // Cập nhật lại giao diện bảng điểm trên máy giáo viên
+            if (typeof renderSubmissions === 'function') {
+                renderSubmissions();
+            } else if (typeof updateSubmissionsTable === 'function') {
+                updateSubmissionsTable();
+            } else {
+                location.reload();
+            }
+            
+            alert('Đã tải thành công ' + cloudSubmissions.length + ' bài nộp của học sinh từ đám mây về máy giáo viên!');
+        } else {
+            alert('Đám mây hiện tại chưa ghi nhận bài nộp nào.');
+        }
+    } catch (e) {
+        console.error("Lỗi tải dữ liệu:", e);
+        alert('Lỗi tải dữ liệu: ' + e.message);
+    }
+}
 <!-- Các phần mã nguồn cũ phía trên của website giangnam146.site -->
         ...
         </div>
