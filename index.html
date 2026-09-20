@@ -2537,25 +2537,57 @@
             document.getElementById('backupModal').classList.add('modal-active');
         }
 
-        function exportBackupJson() {
-            const backupData = { 
-                lessonsList: window.lessonsList, 
-                documentsList: window.documentsList, 
-                studentsList: window.studentsList, 
-                classesList: window.classesList, 
-                masterQuestionsByGradeAndTopic: window.masterQuestionsByGradeAndTopic, 
-                topicSchedules: window.topicSchedules,
-                submissionsList: window.submissionsList 
-            };
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'giangnam_backup_full.json';
-            a.click();
-            showMessage('Sao lưu', 'Đã xuất file sao lưu dữ liệu (.JSON) về máy!');
-        }
+        async function exportBackupJson() {
+    const backupData = { 
+        lessonsList: window.lessonsList, 
+        documentsList: window.documentsList, 
+        studentsList: window.studentsList, 
+        classesList: window.classesList, 
+        masterQuestionsByGradeAndTopic: window.masterQuestionsByGradeAndTopic, 
+        topicSchedules: window.topicSchedules,
+        submissionsList: window.submissionsList 
+    };
+    const jsonString = JSON.stringify(backupData, null, 2);
 
+    // Ưu tiên sử dụng Web Share API (Cực kỳ mạnh mẽ trên điện thoại: Cho phép gửi thẳng qua Zalo, Drive, Lưu Files)
+    if (navigator.share && navigator.canShare) {
+        try {
+            const file = new File([jsonString], 'giangnam_backup_full.json', { type: 'application/json' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'Sao lưu dữ liệu Giang Nam',
+                    text: 'File sao lưu hệ thống giangnam146.site',
+                    files: [file]
+                });
+                return;
+            }
+        } catch (err) {
+            console.log('Chia sẻ trực tiếp bị hủy hoặc không hỗ trợ, chuyển sang tải file tiêu chuẩn.');
+        }
+    }
+
+    // Dự phòng cho máy tính hoặc các trình duyệt di động tiêu chuẩn
+    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'giangnam_backup_full.json';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    
+    try {
+        a.click();
+    } catch (e) {
+        window.open(url, '_blank');
+    }
+    
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 1000);
+
+    showMessage('Sao lưu', 'Đã khởi tạo tải file sao lưu (.JSON)! Kiểm tra thư mục Tải về (Downloads) trên thiết bị.');
+}        
         function importBackupJsonFile() {
             const fileInput = document.getElementById('importJsonFileInput');
             if (!fileInput || fileInput.files.length === 0) {
