@@ -19,6 +19,11 @@
         window.db = null;
         window.auth = null;
         window.cloudSyncActive = false;
+        
+        window.setDoc = setDoc;
+        window.doc = doc;
+        window.collection = collection;
+        window.getDocs = getDocs;
 
         try {
             const firebaseConfig = {
@@ -61,7 +66,6 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
 
-        /* Marquee Banner Styles */
         .marquee-wrapper {
             width: 100%;
             overflow: hidden;
@@ -190,7 +194,7 @@
                 </div>
                 <div class="bg-slate-800/50 border border-slate-800 p-6 rounded-2xl">
                     <div class="w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-file-word"></i></div>
-                    <h3 class="text-lg font-bold text-white mb-2">Xuất Word 4 Mã Đề & Chấm OMR</h3>
+                    <h3 class="text-lg font-bold text-white mb-2">Xuất 4 Mã Đề & Chấm OMR</h3>
                     <p class="text-slate-400 text-sm">Xuất 4 mã đề chuẩn Sở (Lề 2.5/1.5), phiếu tô A4 gọn 1 trang và chấm đồng loạt nhiều ảnh phiếu tô.</p>
                 </div>
             </div>
@@ -337,7 +341,7 @@
                     <h2 class="text-2xl font-bold text-white">DASHBOARD GIÁO VIÊN</h2>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="forceSyncCloudData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                    <button onclick="loadSubmissionsFromCloud()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
                         <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải lại dữ liệu Đám Mây</span>
                     </button>
                     <div class="flex items-center space-x-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
@@ -716,14 +720,20 @@
         </div>
     </div>
 
-    <!-- Add Student Modal -->
+    <!-- Add Student Modal (Supports Single Add & Excel Bulk Import) -->
     <div id="addStudentModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-6 space-y-4 relative">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-6 space-y-5 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeAddStudentModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="font-bold text-lg text-white">Thêm học sinh mới</h3>
-            <form id="studentForm" onsubmit="handleSaveStudent(event)" class="space-y-4">
+            <h3 class="font-bold text-lg text-white">Quản lý & Thêm danh sách học sinh</h3>
+            
+            <div class="flex rounded-xl bg-slate-800 p-1">
+                <button onclick="switchStudentTab('single')" id="studentTabSingleBtn" class="flex-1 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition">Thêm từng học sinh</button>
+                <button onclick="switchStudentTab('bulk')" id="studentTabBulkBtn" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition">Nhập danh sách Excel / File</button>
+            </div>
+
+            <form id="studentSingleForm" onsubmit="handleSaveStudent(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên học sinh (ghi rõ ký hiệu A, B nếu trùng tên)</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên học sinh (Ghi rõ ký hiệu A, B nếu trùng tên)</label>
                     <input type="text" id="studentNameInput" required placeholder="Ví dụ: Nguyễn Văn An (A)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -740,9 +750,17 @@
                         </select>
                     </div>
                 </div>
-                <p class="text-xs text-indigo-400">Hệ thống sẽ cấp mã đề độc lập (1000-9999) từ kho riêng của đúng khối lớp đó.</p>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-semibold transition">Thêm học sinh</button>
             </form>
+
+            <div id="studentBulkSection" class="space-y-4 hidden">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                    <label class="block text-xs font-bold text-amber-400"><i class="fa-solid fa-file-excel mr-1"></i> Tải lên file Excel danh sách học sinh</label>
+                    <p class="text-[11px] text-slate-300">File Excel gồm các cột: <b>Họ và tên</b>, <b>Lớp</b>, <b>Khối</b>.</p>
+                    <input type="file" id="excelStudentFileInput" accept=".xlsx, .xls, .csv" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500">
+                    <button type="button" onclick="importStudentsFromExcel()" class="w-full bg-amber-600 hover:bg-amber-500 text-white py-2.5 rounded-xl text-xs font-semibold transition">Xác nhận nhập danh sách Excel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -787,9 +805,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Chọn Chủ đề</label>
-                        <select id="quizTopicSelectInput" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-                            <!-- Dynamic populated -->
-                        </select>
+                        <select id="quizTopicSelectInput" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"></select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Loại kỳ thi</label>
@@ -804,29 +820,23 @@
                     </div>
                 </div>
 
-                <!-- Schedule Date & Time Windows -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
                     <div>
                         <label class="block text-xs font-medium text-indigo-300 mb-1"><i class="fa-solid fa-calendar-days mr-1"></i> Thời gian bắt đầu mở đề</label>
                         <input type="datetime-local" id="quizStartDateInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <p class="text-[10px] text-slate-400 mt-1">Trước thời gian này học sinh không thấy đề.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-indigo-300 mb-1"><i class="fa-solid fa-calendar-xmark mr-1"></i> Thời hạn đóng đề (Hạn nộp)</label>
                         <input type="datetime-local" id="quizEndDateInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
-                        <p class="text-[10px] text-slate-400 mt-1">Sau thời gian này hệ thống tự động khóa & chấm 0 điểm.</p>
                     </div>
                 </div>
 
-                <!-- Bulk Paste Box for Topics & Questions -->
                 <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl space-y-2">
                     <label class="block text-xs font-bold text-indigo-300">📥 Nhập nhanh toàn bộ câu hỏi (Dán văn bản có sẵn)</label>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">Dán nội dung toàn bộ đề vào ô dưới đây, hệ thống sẽ tự động làm sạch tiền tố ('Câu 1:', '1.') và lưu vào kho riêng của chủ đề & khối đã chọn:</p>
                     <textarea id="bulkPasteText" rows="4" placeholder="Ví dụ:&#10;Câu 1: Bản thân em có những điểm mạnh gì?&#10;A. Ý A&#10;B. Ý B&#10;C. Ý C&#10;D. Ý D&#10;Đáp án: B" class="w-full bg-slate-900 border border-indigo-500/50 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-400"></textarea>
                     <button type="button" onclick="parseBulkQuestions()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-xs font-semibold transition"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Tự động phân tích & Thêm vào kho chủ đề</button>
                 </div>
 
-                <!-- Structured Question Creator Box -->
                 <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-2xl space-y-3">
                     <h4 class="font-bold text-sm text-indigo-300">Thêm câu hỏi chi tiết thủ công</h4>
                     <div>
@@ -878,7 +888,7 @@
         </div>
     </div>
 
-    <!-- Word Export Modal (Xuất 4 mã đề chuẩn Sở & Phiếu tô A4) -->
+    <!-- Word Export Modal -->
     <div id="wordExportModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-6 space-y-5 relative shadow-2xl">
             <button onclick="closeModal('wordExportModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -937,7 +947,7 @@
         </div>
     </div>
 
-    <!-- Photo Grading Modal (Chấm đồng loạt nhiều ảnh phiếu tô OMR) -->
+    <!-- Photo Grading Modal -->
     <div id="photoGradingModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-xl p-6 space-y-5 relative shadow-2xl max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('photoGradingModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -993,7 +1003,7 @@
         </div>
     </div>
 
-    <!-- Submissions Modal (Bài nộp thời gian thực theo Khối & Chủ đề) -->
+    <!-- Submissions Modal -->
     <div id="submissionsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-4xl p-6 space-y-4 relative max-h-[85vh] overflow-y-auto shadow-2xl">
             <button onclick="closeModal('submissionsModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -1016,7 +1026,7 @@
         </div>
     </div>
 
-    <!-- Backup & Transfer Modal (.JSON Import/Export) -->
+    <!-- Backup Modal -->
     <div id="backupModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-6 space-y-4 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('backupModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -1038,98 +1048,14 @@
     </div>
 
     <script>
-       const appId = 'giangnam146-5a353';
-        // 1. Khởi tạo kết nối Firebase toàn cục cho mọi thiết bị
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        const appId = 'giangnam146-5a353';
 
-const firebaseConfig = {
-    apiKey: "AIzaSy...", // Giữ nguyên apiKey của dự án thầy
-    authDomain: "giangnam146-5a353.firebaseapp.com",
-    projectId: "giangnam146-5a353",
-    storageBucket: "giangnam146-5a353.appspot.com",
-    messagingSenderId: "...",
-    appId: "..."
-};
-
-// Khởi tạo và ép buộc bật chế độ đồng bộ đám mây
-try {
-    const app = initializeApp(firebaseConfig);
-    window.db = getFirestore(app);
-    window.cloudSyncActive = true;
-    console.log("Kết nối Firebase thành công tuyệt đối!");
-} catch (err) {
-    console.error("Lỗi khởi tạo Firebase:", err);
-    window.cloudSyncActive = false;
-}
-
-// 2. Hàm lưu và đẩy dữ liệu tự động lên đám mây khi học sinh nộp bài
-async function saveToCloud(collectionName, dataList) {
-    try {
-        // Luôn lưu dự phòng an toàn trên thiết bị của học sinh
-        localStorage.setItem('gn_' + collectionName, JSON.stringify(dataList));
-        
-        // Đẩy dữ liệu trực tiếp lên kho Firestore trên mây
-        if (window.db) {
-            for (const item of dataList) {
-                // Tạo ID định danh duy nhất cho mỗi bài nộp của học sinh
-                const itemId = item.id || ('sub_' + (item.studentId || Date.now()) + '_' + Math.floor(Math.random() * 1000));
-                
-                await setDoc(doc(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', collectionName, itemId), item, { merge: true });
-            }
-            console.log("Đã đồng bộ bài nộp lên đám mây thành công!");
-        } else {
-            console.warn("Chưa kết nối được cơ sở dữ liệu mây.");
-        }
-    } catch (e) {
-        console.error("Lỗi đẩy dữ liệu lên mây:", e);
-    }
-}
-
-// 3. Hàm tải dữ liệu về máy giáo viên (Gắn vào nút "Tải lại dữ liệu Đám Mây")
-async function loadSubmissionsFromCloud() {
-    if (!window.db) {
-        alert("Chưa kết nối được đám mây!");
-        return;
-    }
-    try {
-        const querySnapshot = await getDocs(collection(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', 'submissions'));
-        const cloudSubmissions = [];
-        querySnapshot.forEach((doc) => {
-            cloudSubmissions.push(doc.data());
-        });
-        
-        if (cloudSubmissions.length > 0) {
-            window.submissionsList = cloudSubmissions;
-            localStorage.setItem('gn_submissions', JSON.stringify(cloudSubmissions));
-            
-            // Cập nhật lại giao diện bảng điểm trên máy giáo viên
-            if (typeof renderSubmissions === 'function') {
-                renderSubmissions();
-            } else if (typeof updateSubmissionsTable === 'function') {
-                updateSubmissionsTable();
-            } else {
-                location.reload();
-            }
-            
-            alert('Đã tải thành công ' + cloudSubmissions.length + ' bài nộp của học sinh từ đám mây về máy giáo viên!');
-        } else {
-            alert('Đám mây hiện tại chưa ghi nhận bài nộp nào.');
-        }
-    } catch (e) {
-        console.error("Lỗi tải dữ liệu:", e);
-        alert('Lỗi tải dữ liệu: ' + e.message);
-    }
-}
-
-        // Predefined Topics per Grade (Khối 10: 11 chủ đề | Khối 11 & 12: 10 chủ đề)
         const GRADE_TOPICS = {
             'Khối 10': ['Chủ đề 1', 'Chủ đề 2', 'Chủ đề 3', 'Chủ đề 4', 'Chủ đề 5', 'Chủ đề 6', 'Chủ đề 7', 'Chủ đề 8', 'Chủ đề 9', 'Chủ đề 10', 'Chủ đề 11'],
             'Khối 11': ['Chủ đề 1', 'Chủ đề 2', 'Chủ đề 3', 'Chủ đề 4', 'Chủ đề 5', 'Chủ đề 6', 'Chủ đề 7', 'Chủ đề 8', 'Chủ đề 9', 'Chủ đề 10'],
             'Khối 12': ['Chủ đề 1', 'Chủ đề 2', 'Chủ đề 3', 'Chủ đề 4', 'Chủ đề 5', 'Chủ đề 6', 'Chủ đề 7', 'Chủ đề 8', 'Chủ đề 9', 'Chủ đề 10']
         };
 
-        // State variables with LocalStorage fallback
         window.lessonsList = JSON.parse(localStorage.getItem('gn_lessons') || '[]');
         window.documentsList = JSON.parse(localStorage.getItem('gn_documents') || '[]');
         window.studentsList = JSON.parse(localStorage.getItem('gn_students') || '[]');
@@ -1152,7 +1078,6 @@ async function loadSubmissionsFromCloud() {
             return String(rawText).replace(/^(câu\s*\d+[\:\.]?\s*|\d+[\.\)]\s*)/i, '').trim();
         }
 
-        // HĐTN Evaluation Rule: <5: Không đạt | 5-6.9: Đạt | 7-8.9: Khá | 9-10: Xuất sắc
         function getHdtnEvaluation(score) {
             const num = parseFloat(score);
             if (num < 5.0) return { label: 'Không đạt', color: 'text-red-400 bg-red-500/10 border-red-500/30' };
@@ -1161,7 +1086,6 @@ async function loadSubmissionsFromCloud() {
             return { label: 'Đạt', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
         }
 
-        // High-Entropy Seeded Shuffling for both Question Order and Option Positions (keeping A,B,C,D labels)
         function shuffleQuestionsWithSeed(questions, codeStr) {
             if (!questions || questions.length === 0) return [];
             let seed = parseInt(String(codeStr).replace(/\D/g, ''), 10) || 1234;
@@ -1170,9 +1094,7 @@ async function loadSubmissionsFromCloud() {
                 return seed / 2147483647;
             }
             let cloned = JSON.parse(JSON.stringify(questions));
-            cloned.forEach(q => {
-                q.text = cleanQuestionText(q.text);
-            });
+            cloned.forEach(q => { q.text = cleanQuestionText(q.text); });
 
             for (let i = cloned.length - 1; i > 0; i--) {
                 const j = Math.floor(seededRandom() * (i + 1));
@@ -1217,7 +1139,6 @@ async function loadSubmissionsFromCloud() {
             checkAutoExpiredQuizzes();
         });
 
-        // Check if deadline has passed for any unsubmitted topic and auto-submit 0 points if needed
         function checkAutoExpiredQuizzes() {
             if (!window.currentUser || window.currentUser.role !== 'student') return;
             const currentStudent = window.studentsList.find(s => s.name === window.currentUser.name && s.class === window.currentUser.class);
@@ -1284,7 +1205,6 @@ async function loadSubmissionsFromCloud() {
             topicEl.innerHTML = topics.map(t => `<option value="${t}">${t}</option>`).join('');
         }
 
-        // Chunked Cloud Storage Engine for Heavy Files (Lessons & Worksheets to prevent 1MB Firestore limit)
         function saveLargeItemToCloud(collectionName, item) {
             try {
                 let list = (collectionName === 'lessons' ? window.lessonsList : window.documentsList);
@@ -1305,10 +1225,10 @@ async function loadSubmissionsFromCloud() {
                         mainItem.hasChunks = true;
                         mainItem.chunksCount = chunksCount;
 
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), mainItem).then(() => {
+                        window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), mainItem).then(() => {
                             for (let i = 0; i < chunksCount; i++) {
                                 const chunkData = fileData.substring(i * chunkSize, (i + 1) * chunkSize);
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName + '_chunks', `${item.id}_chunk_${i}`), {
+                                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName + '_chunks', `${item.id}_chunk_${i}`), {
                                     parentId: item.id,
                                     chunkIndex: i,
                                     data: chunkData
@@ -1316,23 +1236,21 @@ async function loadSubmissionsFromCloud() {
                             }
                         }).catch(e => {});
                     } else {
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), item).catch(err => {});
+                        window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), item).catch(err => {});
                     }
                 }
             } catch (e) {}
         }
 
-        // Enhanced Real-Time & Initial Fetch Cloud Sync Engine (Guarantees immediate loading on mobile and all devices)
         window.initCloudListeners = async function() {
             if (!window.db) return;
             try {
                 const collectionsToSync = ['classes', 'students', 'lessons', 'documents', 'submissions'];
                 for (const colName of collectionsToSync) {
-                    const qRef = collection(window.db, 'artifacts', appId, 'public', 'data', colName);
+                    const qRef = window.collection(window.db, 'artifacts', appId, 'public', 'data', colName);
                     
-                    // Initial Fetch using getDocs to instantly load on mobile
                     try {
-                        const snapshot = await getDocs(qRef);
+                        const snapshot = await window.getDocs(qRef);
                         let cloudData = [];
                         snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
                         if (cloudData.length > 0) {
@@ -1342,11 +1260,8 @@ async function loadSubmissionsFromCloud() {
                             else if (colName === 'documents') { window.documentsList = cloudData; localStorage.setItem('gn_documents', JSON.stringify(cloudData)); }
                             else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
                         }
-                    } catch (fetchErr) {
-                        console.warn(`Fetch notice for ${colName}:`, fetchErr);
-                    }
+                    } catch (fetchErr) {}
 
-                    // Real-time snapshot listener
                     onSnapshot(qRef, (snapshot) => {
                         let cloudData = [];
                         snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
@@ -1358,14 +1273,10 @@ async function loadSubmissionsFromCloud() {
                             else if (colName === 'submissions') { window.submissionsList = cloudData; localStorage.setItem('gn_submissions', JSON.stringify(cloudData)); }
                             refreshActiveViews();
                         }
-                    }, (err) => {
-                        console.warn(`Listener error for ${colName}:`, err);
-                    });
+                    }, (err) => {});
                 }
                 refreshActiveViews();
-            } catch (e) {
-                console.warn("Cloud sync init warning:", e);
-            }
+            } catch (e) {}
         };
 
         function forceSyncCloudData() {
@@ -1377,24 +1288,47 @@ async function loadSubmissionsFromCloud() {
             }
         }
 
-        function saveToCloud(collectionName, dataList) {
+        async function saveToCloud(collectionName, dataList) {
             try {
                 localStorage.setItem('gn_' + collectionName, JSON.stringify(dataList));
-                if (window.db && window.cloudSyncActive) {
-                    dataList.forEach(item => {
-                        const itemId = item.id || ('item_' + Date.now());
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId), item).catch(err => {});
-                    });
+                if (window.db && typeof window.setDoc === 'function' && typeof window.doc === 'function') {
+                    for (const item of dataList) {
+                        const itemId = item.id || ('item_' + Date.now() + '_' + Math.floor(Math.random()*1000));
+                        await window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId), item, { merge: true });
+                    }
                 }
             } catch (e) {}
+        }
+
+        async function loadSubmissionsFromCloud() {
+            if (!window.db || typeof window.getDocs === 'undefined' || typeof window.collection === 'undefined') {
+                showMessage('Thông báo', 'Hệ thống đám mây chưa sẵn sàng!');
+                return;
+            }
+            try {
+                const querySnapshot = await window.getDocs(window.collection(window.db, 'artifacts', appId, 'public', 'data', 'submissions'));
+                const cloudSubmissions = [];
+                querySnapshot.forEach((docSnap) => {
+                    cloudSubmissions.push(docSnap.data());
+                });
+                
+                if (cloudSubmissions.length > 0) {
+                    window.submissionsList = cloudSubmissions;
+                    localStorage.setItem('gn_submissions', JSON.stringify(cloudSubmissions));
+                    refreshActiveViews();
+                    showMessage('Đồng bộ thành công', 'Đã tải thành công ' + cloudSubmissions.length + ' bài nộp từ đám mây về máy giáo viên!');
+                } else {
+                    showMessage('Đồng bộ', 'Đám mây hiện tại chưa ghi nhận bài nộp nào.');
+                }
+            } catch (e) {
+                showMessage('Lỗi', 'Không thể tải dữ liệu: ' + e.message);
+            }
         }
 
         function loadTeacherAvatar() {
             const savedAvatar = localStorage.getItem('gn_teacher_avatar');
             const imgEl = document.getElementById('aboutTeacherImg');
-            if (savedAvatar && imgEl) {
-                imgEl.src = savedAvatar;
-            }
+            if (savedAvatar && imgEl) { imgEl.src = savedAvatar; }
         }
 
         function handleTeacherAvatarUpload(event) {
@@ -1534,16 +1468,9 @@ async function loadSubmissionsFromCloud() {
                 const selectedClass = document.getElementById('loginStudentClass').value;
                 const name = document.getElementById('loginStudentName').value.trim();
                 
-                if (!selectedClass) {
-                    showMessage('Thông báo', 'Vui lòng chọn lớp học!');
-                    return;
-                }
-                if (!name) {
-                    showMessage('Thông báo', 'Vui lòng nhập họ và tên học sinh!');
-                    return;
-                }
+                if (!selectedClass) { showMessage('Thông báo', 'Vui lòng chọn lớp học!'); return; }
+                if (!name) { showMessage('Thông báo', 'Vui lòng nhập họ và tên học sinh!'); return; }
                 
-                // Strict exact match check against pre-created student list (case-sensitive & diacritic-sensitive)
                 const studentRecord = window.studentsList.find(s => s.class === selectedClass && s.name === name);
                 if (!studentRecord) {
                     showMessage('Đăng nhập thất bại', 'Họ và tên hoặc lớp học không khớp với danh sách do giáo viên tạo!\n\nLưu ý: Hệ thống yêu cầu gõ chính xác từng ký tự (phân biệt hoa thường, dấu tiếng Việt và ký hiệu A/B nếu trùng tên). Vui lòng kiểm tra lại.');
@@ -1801,12 +1728,11 @@ async function loadSubmissionsFromCloud() {
 
         function startQuizTimer() {
             if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
-            let timeLeft = 45 * 60; // 45 minutes
+            let timeLeft = 45 * 60;
             const timerEl = document.getElementById('quizCountdownTimer');
             window.quizTimerInterval = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(window.quizTimerInterval);
-                    alert("Đã hết thời gian làm bài (45 phút)! Hệ thống sẽ tự động nộp bài.");
                     const form = document.getElementById('studentQuizForm');
                     if (form) form.requestSubmit();
                     return;
@@ -1818,7 +1744,6 @@ async function loadSubmissionsFromCloud() {
             }, 1000);
         }
 
-        // Render Quizzes & Topics for Students with schedule checks & single-attempt locking
         function renderQuizzes() {
             const container = document.getElementById('quizContainer');
             const subtitle = document.getElementById('quizSubtitle');
@@ -2293,7 +2218,6 @@ async function loadSubmissionsFromCloud() {
             }
         }
 
-        // Export Excel Alphabet sorted by student name
         function exportScoresExcel() {
             if (!window.submissionsList || window.submissionsList.length === 0) {
                 showMessage('Chưa có dữ liệu', 'Chưa có kết quả bài nộp nào để xuất Excel!');
@@ -2341,6 +2265,24 @@ async function loadSubmissionsFromCloud() {
         function openAddWorksheetModal() { document.getElementById('addWorksheetModal').classList.add('modal-active'); }
         function closeAddWorksheetModal() { document.getElementById('addWorksheetModal').classList.remove('modal-active'); }
 
+        function switchStudentTab(mode) {
+            const sBtn = document.getElementById('studentTabSingleBtn');
+            const bBtn = document.getElementById('studentTabBulkBtn');
+            const sForm = document.getElementById('studentSingleForm');
+            const bSec = document.getElementById('studentBulkSection');
+            if (mode === 'single') {
+                if (sBtn) sBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition";
+                if (bBtn) bBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition";
+                if (sForm) sForm.classList.remove('hidden');
+                if (bSec) bSec.classList.add('hidden');
+            } else {
+                if (bBtn) bBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-indigo-600 text-white transition";
+                if (sBtn) sBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition";
+                if (bSec) bSec.classList.remove('hidden');
+                if (sForm) sForm.classList.add('hidden');
+            }
+        }
+
         function openAddStudentModal() {
             const selectEl = document.getElementById('studentClassInput');
             if (selectEl) {
@@ -2350,9 +2292,57 @@ async function loadSubmissionsFromCloud() {
                     selectEl.innerHTML = `<option value="">Chưa có lớp học nào</option>`;
                 }
             }
+            switchStudentTab('single');
             document.getElementById('addStudentModal').classList.add('modal-active');
         }
         function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('modal-active'); }
+
+        function importStudentsFromExcel() {
+            const fileInput = document.getElementById('excelStudentFileInput');
+            if (!fileInput || fileInput.files.length === 0) {
+                showMessage('Chưa chọn file', 'Vui lòng chọn file Excel danh sách học sinh!');
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonRows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    let importedCount = 0;
+                    jsonRows.forEach((row, index) => {
+                        if (index === 0) return;
+                        let name = row[0] ? String(row[0]).trim() : '';
+                        let sClass = row[1] ? String(row[1]).trim() : (window.classesList[0] ? window.classesList[0].name : '10A');
+                        let grade = row[2] ? String(row[2]).trim() : 'Khối 10';
+
+                        if (name) {
+                            const newStudent = {
+                                id: 'student_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                                name: name,
+                                class: sClass,
+                                grade: grade,
+                                assignedQuizCode: String(Math.floor(1000 + Math.random() * 9000))
+                            };
+                            window.studentsList.unshift(newStudent);
+                            importedCount++;
+                        }
+                    });
+
+                    saveToCloud('students', window.studentsList);
+                    ensureUniqueCodesPerCard();
+                    closeAddStudentModal();
+                    renderTeacherDashboard();
+                    showMessage('Thành công', `Đã nhập thành công ${importedCount} học sinh từ file Excel và đồng bộ lên đám mây vĩnh viễn!`);
+                } catch (err) {
+                    showMessage('Lỗi đọc file', 'Không thể đọc file Excel. Vui lòng kiểm tra lại định dạng tệp!');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
 
         function openAddClassModal() { document.getElementById('addClassModal').classList.add('modal-active'); }
         function closeAddClassModal() { document.getElementById('addClassModal').classList.remove('modal-active'); }
@@ -2360,7 +2350,6 @@ async function loadSubmissionsFromCloud() {
         function openWordExportModal() { document.getElementById('wordExportModal').classList.add('modal-active'); }
         function openPhotoGradingModal() { document.getElementById('photoGradingModal').classList.add('modal-active'); }
 
-        // Batch Photo Grading for multiple images sorted by Alphabet
         function runBatchOcrScanGrading() {
             const grade = document.getElementById('gradingBatchGrade').value;
             const topic = document.getElementById('gradingBatchTopicSelect').value;
@@ -2416,7 +2405,6 @@ async function loadSubmissionsFromCloud() {
             }
         });
 
-        // Export 4 Exam Codes Word Document with standard margins (Left 2.5, Right 1.5, Top 1.5, Bottom 1.5)
         function exportWordExams() {
             const grade = document.getElementById('exportWordGrade').value;
             const topic = document.getElementById('exportWordTopicSelect').value;
@@ -2435,10 +2423,7 @@ async function loadSubmissionsFromCloud() {
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>${title}</title>
                 <style>
-                    @page {
-                        size: A4 portrait;
-                        margin: 1.5cm 1.5cm 1.5cm 2.5cm; /* Top, Right, Bottom, Left */
-                    }
+                    @page { size: A4 portrait; margin: 1.5cm 1.5cm 1.5cm 2.5cm; }
                     body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; line-height: 1.35; margin: 0; }
                     .header-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
                     .header-table td { width: 50%; vertical-align: top; text-align: center; font-size: 12pt; }
@@ -2522,9 +2507,7 @@ async function loadSubmissionsFromCloud() {
                     </div>
                     <table class="bubble-table">
                         <tr>
-                            ${[1, 2, 3, 4].map(_ => `
-                                <th>Câu</th><th>A</th><th>B</th><th>C</th><th>D</th>
-                            `).join('')}
+                            ${[1, 2, 3, 4].map(_ => `<th>Câu</th><th>A</th><th>B</th><th>C</th><th>D</th>`).join('')}
                         </tr>
                         ${Array.from({length: 13}, (_, i) => i + 1).map(rowNum => `
                             <tr>
@@ -2615,61 +2598,46 @@ async function loadSubmissionsFromCloud() {
             document.getElementById('submissionsModal').classList.add('modal-active'); 
         }
 
-        function openBackupModal() {
-            document.getElementById('backupModal').classList.add('modal-active');
-        }
+        function openBackupModal() { document.getElementById('backupModal').classList.add('modal-active'); }
 
         async function exportBackupJson() {
-    const backupData = { 
-        lessonsList: window.lessonsList, 
-        documentsList: window.documentsList, 
-        studentsList: window.studentsList, 
-        classesList: window.classesList, 
-        masterQuestionsByGradeAndTopic: window.masterQuestionsByGradeAndTopic, 
-        topicSchedules: window.topicSchedules,
-        submissionsList: window.submissionsList 
-    };
-    const jsonString = JSON.stringify(backupData, null, 2);
+            const backupData = { 
+                lessonsList: window.lessonsList, 
+                documentsList: window.documentsList, 
+                studentsList: window.studentsList, 
+                classesList: window.classesList, 
+                masterQuestionsByGradeAndTopic: window.masterQuestionsByGradeAndTopic, 
+                topicSchedules: window.topicSchedules,
+                submissionsList: window.submissionsList 
+            };
+            const jsonString = JSON.stringify(backupData, null, 2);
 
-    // Ưu tiên sử dụng Web Share API (Cực kỳ mạnh mẽ trên điện thoại: Cho phép gửi thẳng qua Zalo, Drive, Lưu Files)
-    if (navigator.share && navigator.canShare) {
-        try {
-            const file = new File([jsonString], 'giangnam_backup_full.json', { type: 'application/json' });
-            if (navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    title: 'Sao lưu dữ liệu Giang Nam',
-                    text: 'File sao lưu hệ thống giangnam146.site',
-                    files: [file]
-                });
-                return;
+            if (navigator.share && navigator.canShare) {
+                try {
+                    const file = new File([jsonString], 'giangnam_backup_full.json', { type: 'application/json' });
+                    if (navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'Sao lưu dữ liệu Giang Nam',
+                            text: 'File sao lưu hệ thống giangnam146.site',
+                            files: [file]
+                        });
+                        return;
+                    }
+                } catch (err) {}
             }
-        } catch (err) {
-            console.log('Chia sẻ trực tiếp bị hủy hoặc không hỗ trợ, chuyển sang tải file tiêu chuẩn.');
+
+            const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'giangnam_backup_full.json';
+            a.target = '_blank';
+            document.body.appendChild(a);
+            try { a.click(); } catch (e) { window.open(url, '_blank'); }
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+            showMessage('Sao lưu', 'Đã khởi tạo tải file sao lưu (.JSON)!');
         }
-    }
 
-    // Dự phòng cho máy tính hoặc các trình duyệt di động tiêu chuẩn
-    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'giangnam_backup_full.json';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    
-    try {
-        a.click();
-    } catch (e) {
-        window.open(url, '_blank');
-    }
-    
-    setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, 1000);
-
-    showMessage('Sao lưu', 'Đã khởi tạo tải file sao lưu (.JSON)! Kiểm tra thư mục Tải về (Downloads) trên thiết bị.');
-}        
         function importBackupJsonFile() {
             const fileInput = document.getElementById('importJsonFileInput');
             if (!fileInput || fileInput.files.length === 0) {
@@ -2713,10 +2681,7 @@ async function loadSubmissionsFromCloud() {
 
         function parseBulkQuestions() {
             const text = document.getElementById('bulkPasteText').value.trim();
-            if (!text) {
-                showMessage('Chưa có nội dung', 'Vui lòng dán văn bản bộ đề vào ô trước khi phân tích!');
-                return;
-            }
+            if (!text) { showMessage('Chưa có nội dung', 'Vui lòng dán văn bản bộ đề vào ô trước khi phân tích!'); return; }
 
             const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
             let currentQ = null;
@@ -2741,14 +2706,10 @@ async function loadSubmissionsFromCloud() {
                 } else if (line.match(/^(đáp án|đúng|ans|answer)[:\-]\s*([a-d])/i)) {
                     if (currentQ) {
                         const match = line.match(/^(đáp án|đúng|ans|answer)[:\-]\s*([a-d])/i);
-                        if (match && match[2]) {
-                            currentQ.correct = match[2].toUpperCase();
-                        }
+                        if (match && match[2]) { currentQ.correct = match[2].toUpperCase(); }
                     }
                 } else {
-                    if (currentQ && !currentQ.options.A) {
-                        currentQ.text += " " + line;
-                    }
+                    if (currentQ && !currentQ.options.A) { currentQ.text += " " + line; }
                 }
             });
 
@@ -2845,10 +2806,7 @@ async function loadSubmissionsFromCloud() {
             reader.onload = function(event) {
                 const newLesson = {
                     id: 'lesson_' + Date.now(),
-                    title,
-                    subject,
-                    grade,
-                    desc,
+                    title, subject, grade, desc,
                     fileName: file.name,
                     fileData: event.target.result
                 };
@@ -2887,9 +2845,7 @@ async function loadSubmissionsFromCloud() {
             reader.onload = function(event) {
                 const newDoc = {
                     id: 'doc_' + Date.now(),
-                    title,
-                    subject,
-                    grade,
+                    title, subject, grade,
                     fileName: file.name,
                     fileData: event.target.result
                 };
@@ -3012,64 +2968,5 @@ async function loadSubmissionsFromCloud() {
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
     </script>
-    <script>
-// --- ĐOẠN MÃ ĐỒNG BỘ ĐÁM MÂY TỰ ĐỘNG (AN TOÀN TUYỆT ĐỐI) ---
-async function saveToCloud(collectionName, dataList) {
-    try {
-        localStorage.setItem('gn_' + collectionName, JSON.stringify(dataList));
-        if (window.db && typeof setDoc !== 'undefined' && typeof doc !== 'undefined') {
-            for (const item of dataList) {
-                const itemId = item.id || ('sub_' + (item.studentId || Date.now()) + '_' + Math.floor(Math.random() * 1000));
-                await setDoc(doc(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', collectionName, itemId), item, { merge: true });
-            }
-            console.log("Đã tự động đẩy dữ liệu lên đám mây thành công!");
-        }
-    } catch (e) {
-        console.warn("Lỗi đồng bộ mây:", e);
-    }
-}
-
-async function loadSubmissionsFromCloud() {
-    if (!window.db || typeof getDocs === 'undefined' || typeof collection === 'undefined') {
-        alert("Hệ thống đám mây chưa sẵn sàng trên thiết bị này!");
-        return;
-    }
-    try {
-        const querySnapshot = await getDocs(collection(window.db, 'artifacts', 'giangnam146-5a353', 'public', 'data', 'submissions'));
-        const cloudSubmissions = [];
-        querySnapshot.forEach((docSnap) => {
-            cloudSubmissions.push(docSnap.data());
-        });
-        
-        if (cloudSubmissions.length > 0) {
-            window.submissionsList = cloudSubmissions;
-            localStorage.setItem('gn_submissions', JSON.stringify(cloudSubmissions));
-            
-            if (typeof renderSubmissions === 'function') {
-                renderSubmissions();
-            } else if (typeof updateSubmissionsTable === 'function') {
-                updateSubmissionsTable();
-            } else {
-                location.reload();
-            }
-            
-            if (typeof showMessage === 'function') {
-                showMessage('Đồng bộ thành công', 'Đã tải ' + cloudSubmissions.length + ' bài nộp từ đám mây (giangnam146-5a353) về máy!');
-            } else {
-                alert('Đã tải thành công ' + cloudSubmissions.length + ' bài nộp từ đám mây về máy!');
-            }
-        } else {
-            if (typeof showMessage === 'function') {
-                showMessage('Đồng bộ', 'Đám mây hiện tại chưa ghi nhận bài nộp nào.');
-            } else {
-                alert('Đám mây hiện tại chưa ghi nhận bài nộp nào.');
-            }
-        }
-    } catch (e) {
-        console.error("Lỗi tải đám mây:", e);
-        alert('Không thể tải dữ liệu: ' + e.message);
-    }
-}
-</script>
 </body>
 </html>
