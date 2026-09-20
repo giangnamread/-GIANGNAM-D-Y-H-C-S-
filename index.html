@@ -2968,5 +2968,24 @@
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
     </script>
+    // Hàm reset bài làm cho học sinh bất kỳ bằng Firebase Firestore
+function resetBaiLam(docId) {
+    if (confirm("Thầy có chắc chắn muốn cho học sinh này làm lại bài từ đầu không?")) {
+        // Trỏ tới bảng/collection chứa kết quả bài làm trên Firebase (ví dụ collection là 'bai_lam_hoc_sinh')
+        db.collection("bai_lam_hoc_sinh").doc(docId).update({
+            trang_thai: "chua_lam",
+            diem: null,
+            da_nop: false
+        })
+        .then(() => {
+            alert("Đã mở lại bài làm cho học sinh thành công!");
+            location.reload(); // Tải lại trang để cập nhật giao diện mới nhất
+        })
+        .catch((error) => {
+            console.error("Lỗi khi reset bài làm: ", error);
+            alert("Có lỗi xảy ra, vui lòng thử lại!");
+        });
+    }
+}
 </body>
 </html>
