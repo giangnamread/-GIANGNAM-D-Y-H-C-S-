@@ -2989,3 +2989,93 @@ function resetBaiLam(docId) {
 }
 </body>
 </html>
+!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý Dạy học số</title>
+    
+    <!-- ========================================== -->
+    <!-- VỊ TRÍ 2: ĐẶT PHẦN CSS IN ẤN Ở ĐÂY         -->
+    <!-- ========================================== -->
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #phieuKetQua, #phieuKetQua * { visibility: visible; }
+            #phieuKetQua { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; }
+            .action-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- VỊ TRÍ 1: ĐẶT KHUNG HTML PHIẾU VÀ NÚT BẤM   -->
+    <!-- ========================================== -->
+    
+    <!-- 1. Khung phiếu kết quả hiển thị cho học sinh/giáo viên -->
+    <div id="phieuKetQua" class="container bg-white p-4 rounded shadow-sm" style="max-width: 800px; margin: auto; color: #000; font-family: Arial, sans-serif;">
+        <!-- (Dán toàn bộ mã HTML khung phiếu kết quả vào đây) -->
+    </div>
+
+    <!-- 2. Thanh công cụ nút bấm In / Tải ảnh -->
+    <div class="text-center my-4 action-bar" style="text-align: center; margin: 20px 0;">
+        <button onclick="inPhieuKetQua()" class="btn btn-primary">In trực tiếp / Lưu PDF</button>
+        <button onclick="taiAnhPhieuKetQua()" class="btn btn-success">Tải ảnh Phiếu kết quả</button>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- VỊ TRÍ 3: ĐẶT THƯ VIỆN VÀ MÃ JAVASCRIPT      -->
+    <!-- ========================================== -->
+    
+    <!-- Nhúng thư viện html2canvas để hỗ trợ tải ảnh -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        // Hàm In trực tiếp
+        function inPhieuKetQua() {
+            window.print();
+        }
+
+        // Hàm Tải ảnh PNG
+        function taiAnhPhieuKetQua() {
+            const phieuElement = document.getElementById('phieuKetQua');
+            html2canvas(phieuElement, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Phieu_Ket_Qua.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // Hàm lưu lịch sử vĩnh viễn lên Firebase Firestore khi học sinh nộp bài
+        function luuLichSuVinhVien(thongTinHS) {
+            db.collection("lich_su_nop_bai").add({
+                ten_hs: thongTinHS.ten,
+                lop: thongTinHS.lop,
+                chu_de: thongTinHS.chuDe,
+                ma_de: thongTinHS.maDe,
+                diem: thongTinHS.diem,
+                so_cau_dung: thongTinHS.soCauDung,
+                chi_tiet_bai: thongTinHS.chiTiet,
+                thoi_gian_nop: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        // Hàm dành cho giáo viên Reset bài làm
+        function resetBaiLamHocSinh(docId) {
+            if (confirm("Thầy có chắc chắn muốn mở lại bài làm cho học sinh này không?")) {
+                db.collection("bai_lam_hoc_sinh").doc(docId).update({
+                    trang_thai: "chua_lam",
+                    diem: null,
+                    da_nop: false
+                }).then(() => {
+                    alert("Đã mở lại bài làm thành công!");
+                    location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
