@@ -2093,7 +2093,8 @@
             const container = document.getElementById('quizContainer');
             if (!container) return;
 
-            let questionsHtml = '<table style="width:100%; border-collapse: collapse; font-size: 8pt; text-align: center; margin-bottom: 2px;">';
+            let questionsHtml = '<style>@media print { body { visibility: hidden; } #studentOmrReportCard, #studentOmrReportCard * { visibility: visible; } #studentOmrReportCard { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; box-shadow: none; border: none; } }</style>';
+            questionsHtml += '<table style="width:100%; border-collapse: collapse; font-size: 8pt; text-align: center; margin-bottom: 2px;">';
             questionsHtml += '<tr style="background:#f2f2f2; font-weight:bold;"><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td><td style="border:1px solid #000; padding:1px;">C</td><td style="border:1px solid #000; padding:1px;">Chọn</td><td style="border:1px solid #000; padding:1px;">Đ/S</td></tr>';
             
             for (let row = 0; row < 10; row++) {
@@ -2114,51 +2115,51 @@
             questionsHtml += '</table>';
 
             container.innerHTML = `
-                <div id="studentOmrReportCard" class="bg-white text-slate-900 p-4 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-1.5 text-xs" style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15;">
-                    <div class="text-center border-b pb-1">
+                <div id="studentOmrReportCard" class="bg-white text-slate-900 p-6 rounded-3xl shadow-2xl max-w-2xl mx-auto space-y-3 text-xs" style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15;">
+                    <div class="text-center border-b pb-2">
                         <p class="font-bold text-xs uppercase" style="font-size: 11pt;">SỞ GIÁO DỤC VÀ ĐÀO TẠO QUẢNG TRỊ</p>
                         <p class="font-bold text-xs uppercase" style="font-size: 11pt;">TRUNG TÂM GDNN-GDTX GIO LINH</p>
                         <h2 class="font-extrabold text-sm mt-1 uppercase text-indigo-700" style="font-size: 12pt;">PHIẾU KẾT QUẢ & ĐÁP ÁN TRẮC NGHIỆM</h2>
                         <p class="text-[11px] text-slate-600">Chủ đề: ${sub.topic} • Khối: ${sub.studentGrade}</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-1 text-[11px] bg-slate-50 p-2 rounded-xl border" style="font-size: 12pt;">
+                    <div class="grid grid-cols-2 gap-1 text-[11px] bg-slate-50 p-3 rounded-xl border" style="font-size: 12pt;">
                         <div><b>Họ và tên học sinh:</b> ${sub.studentName}</div>
                         <div><b>Lớp & Khối:</b> ${sub.studentClass} (${sub.studentGrade})</div>
                         <div><b>Mã đề thi:</b> <span class="font-mono font-bold text-emerald-600">${sub.quizCode}</span></div>
                         <div><b>Thời gian nộp:</b> ${sub.timestamp}</div>
                     </div>
 
-                    <div class="bg-indigo-50 border border-indigo-200 p-2 rounded-xl text-center space-y-0.5" style="font-size: 12pt;">
-                        <div class="text-sm font-black text-indigo-700">${sub.score} điểm</div>
+                    <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-xl text-center space-y-1" style="font-size: 12pt;">
+                        <div class="text-base font-black text-indigo-700">${sub.score} điểm</div>
                         <div class="text-xs font-bold text-slate-800">Đánh giá môn HĐTN: <span class="text-emerald-600">${sub.evaluation}</span></div>
                         <p class="text-[11px] text-slate-600">Số câu đúng: <b>${sub.correctCount} / ${sub.totalQuestions}</b></p>
                     </div>
 
-                    <div class="space-y-0.5">
-                        <h4 class="font-bold text-[11px] text-slate-700 uppercase" style="font-size: 11pt;">Chi tiết câu trả lời của học sinh (50 câu):</h4>
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-[11px] text-slate-700 uppercase" style="font-size: 11pt;">Chi tiết câu trả lời của học sinh:</h4>
                         ${questionsHtml}
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 pt-1 text-center text-[11px]" style="font-size: 12pt;">
+                    <div class="grid grid-cols-2 gap-4 pt-2 text-center text-[11px]" style="font-size: 12pt;">
                         <div>
                             <p class="font-bold">HỌC SINH KÝ TÊN</p>
                             <p class="text-[9px] text-slate-500">(Ký và ghi rõ họ tên)</p>
-                            <div class="h-4"></div>
+                            <div class="h-6"></div>
                             <p class="font-bold border-t pt-0.5 inline-block min-w-[120px]">${sub.studentName}</p>
                         </div>
                         <div>
                             <p class="font-bold">GIÁO VIÊN GIẢNG DẠY</p>
                             <p class="text-[9px] text-slate-500">(Ký và ghi rõ họ tên)</p>
-                            <div class="h-4"></div>
+                            <div class="h-6"></div>
                             <p class="font-bold border-t pt-0.5 inline-block min-w-[120px]">Thầy Nguyễn Giang Nam</p>
                         </div>
                     </div>
 
-                    <div class="flex gap-2 pt-2 border-t">
-                        <button onclick="exportStudentReportWord()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl font-bold text-xs shadow transition"><i class="fa-solid fa-file-word mr-1"></i>Tải báo cáo Word (1 trang A4)</button>
-                        <button onclick="window.print()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl font-bold text-xs shadow transition"><i class="fa-solid fa-print mr-1"></i>In phiếu kết quả</button>
-                        <button onclick="renderQuizzes()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-2 rounded-xl font-bold text-xs transition">Quay lại</button>
+                    <div class="flex gap-2 pt-3 border-t print:hidden">
+                        <button onclick="exportStudentReportWord()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-2.5 rounded-xl font-bold text-xs shadow transition"><i class="fa-solid fa-file-word mr-1"></i>Tải báo cáo Word (1 trang A4)</button>
+                        <button onclick="window.print()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-xl font-bold text-xs shadow transition"><i class="fa-solid fa-print mr-1"></i>In phiếu kết quả</button>
+                        <button onclick="renderQuizzes()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-2.5 rounded-xl font-bold text-xs transition">Quay lại</button>
                     </div>
                 </div>
             `;
@@ -2173,7 +2174,7 @@
                     @page { size: A4 portrait; margin: 1cm; }
                     body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.15; color: #000; }
                     table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #000; padding: 1px 2px; text-align: center; font-size: 9pt; }
+                    th, td { border: 1px solid #000; padding: 2px; text-align: center; font-size: 9pt; }
                 </style>
                 </head>
                 <body>${cardHtml}</body></html>
@@ -2610,43 +2611,55 @@
         }
 
         function importBackupJsonFile() {
-    const fileInput = document.getElementById('importJsonFileInput');
-    if (!fileInput || fileInput.files.length === 0) {
-        showMessage('Chưa chọn file', 'Vui lòng chọn một file sao lưu (.JSON)!');
-        return;
-    }
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            
-            if (data.lessonsList) { window.lessonsList = data.lessonsList; saveToCloud('lessons', data.lessonsList); }
-            if (data.documentsList) { window.documentsList = data.documentsList; saveToCloud('documents', data.documentsList); }
-            if (data.studentsList) { window.studentsList = data.studentsList; saveToCloud('students', data.studentsList); }
-            if (data.classesList) { window.classesList = data.classesList; saveToCloud('classes', data.classesList); }
-            if (data.masterQuestionsByGradeAndTopic) { 
-                window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; 
-                localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
+            const fileInput = document.getElementById('importJsonFileInput');
+            if (!fileInput || fileInput.files.length === 0) {
+                showMessage('Chưa chọn file', 'Vui lòng chọn một file sao lưu (.JSON)!');
+                return;
             }
-            if (data.topicSchedules) { 
-                window.topicSchedules = data.topicSchedules; 
-                localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
-            }
-            if (data.submissionsList) { window.submissionsList = data.submissionsList; saveToCloud('submissions', data.submissionsList); }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.lessonsList) { window.lessonsList = data.lessonsList; saveToCloud('lessons', data.lessonsList); }
+                    if (data.documentsList) { window.documentsList = data.documentsList; saveToCloud('documents', data.documentsList); }
+                    if (data.studentsList) { window.studentsList = data.studentsList; saveToCloud('students', data.studentsList); }
+                    if (data.classesList) { window.classesList = data.classesList; saveToCloud('classes', data.classesList); }
+                    if (data.masterQuestionsByGradeAndTopic) { 
+                        window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; 
+                        localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
+                        for (let k in data.masterQuestionsByGradeAndTopic) {
+                            if (window.db && window.cloudSyncActive) {
+                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', k.replace(/\s+/g, '_')), {
+                                    key: k, questions: data.masterQuestionsByGradeAndTopic[k]
+                                }).catch(e => {});
+                            }
+                        }
+                    }
+                    if (data.topicSchedules) { 
+                        window.topicSchedules = data.topicSchedules; 
+                        localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
+                        for (let k in data.topicSchedules) {
+                            if (window.db && window.cloudSyncActive) {
+                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', k.replace(/\s+/g, '_')), {
+                                    key: k, schedule: data.topicSchedules[k]
+                                }).catch(e => {});
+                            }
+                        }
+                    }
+                    if (data.submissionsList) { window.submissionsList = data.submissionsList; saveToCloud('submissions', data.submissionsList); }
 
-            closeModal('backupModal');
-            refreshActiveViews();
-            showMessage('Thành công', 'Đã nhập dữ liệu từ file sao lưu thành công và đồng bộ lên đám mây!');
-        } catch (err) {
-            // Hiển thị lỗi chi tiết để biết nguyên nhân
-            showMessage('Lỗi cú pháp JSON', 'Chi tiết lỗi: ' + err.message);
-            console.error("JSON Parse Error:", err);
+                    closeModal('backupModal');
+                    refreshActiveViews();
+                    showMessage('Thành công', 'Đã nhập dữ liệu từ file sao lưu thành công và đồng bộ lên đám mây!');
+                } catch (err) {
+                    showMessage('Lỗi định dạng', 'File JSON không hợp lệ hoặc bị hỏng!');
+                }
+            };
+            reader.readAsText(file);
         }
-    };
-    reader.readAsText(file);
-}
-                function openQuizBuilderModal() {
+
+        function openQuizBuilderModal() {
             const titleInput = document.getElementById('quizTitleInput');
             if (titleInput) titleInput.value = 'Kiểm tra HĐTN - Chủ đề 1';
             updateBuilderTopicDropdown();
