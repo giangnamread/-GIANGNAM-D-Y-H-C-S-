@@ -20,6 +20,14 @@
         window.auth = null;
         window.cloudSyncActive = false;
 
+        // Gán các hàm Firestore vào window để các script global truy cập được
+        window.collection = collection;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.onSnapshot = onSnapshot;
+
         try {
             const firebaseConfig = {
                 apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -1217,10 +1225,10 @@
                         mainItem.hasChunks = true;
                         mainItem.chunksCount = chunksCount;
 
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), mainItem).then(() => {
+                        window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), mainItem).then(() => {
                             for (let i = 0; i < chunksCount; i++) {
                                 const chunkData = fileData.substring(i * chunkSize, (i + 1) * chunkSize);
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName + '_chunks', `${item.id}_chunk_${i}`), {
+                                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName + '_chunks', `${item.id}_chunk_${i}`), {
                                     parentId: item.id,
                                     chunkIndex: i,
                                     data: chunkData
@@ -1228,7 +1236,7 @@
                             }
                         }).catch(e => {});
                     } else {
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), item).catch(err => {});
+                        window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, item.id), item).catch(err => {});
                     }
                 }
             } catch (e) {}
@@ -1244,10 +1252,10 @@
                 // 1. Standard collections: classes, students, lessons, documents, submissions
                 const collectionsToSync = ['classes', 'students', 'lessons', 'documents', 'submissions'];
                 for (const colName of collectionsToSync) {
-                    const qRef = collection(window.db, 'artifacts', appId, 'public', 'data', colName);
+                    const qRef = window.collection(window.db, 'artifacts', appId, 'public', 'data', colName);
                     
                     try {
-                        const snapshot = await getDocs(qRef);
+                        const snapshot = await window.getDocs(qRef);
                         let cloudData = [];
                         snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
                         if (cloudData.length > 0) {
@@ -1261,7 +1269,7 @@
                         console.warn(`Fetch notice for ${colName}:`, fetchErr);
                     }
 
-                    onSnapshot(qRef, (snapshot) => {
+                    window.onSnapshot(qRef, (snapshot) => {
                         let cloudData = [];
                         snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
                         if (cloudData.length > 0) {
@@ -1278,9 +1286,9 @@
                 }
 
                 // 2. Master Questions (quizzes) Sync
-                const mqRef = collection(window.db, 'artifacts', appId, 'public', 'data', 'master_questions');
+                const mqRef = window.collection(window.db, 'artifacts', appId, 'public', 'data', 'master_questions');
                 try {
-                    const snap = await getDocs(mqRef);
+                    const snap = await window.getDocs(mqRef);
                     let mqMap = {};
                     snap.forEach(d => {
                         let data = d.data();
@@ -1294,7 +1302,7 @@
                     }
                 } catch (e) {}
 
-                onSnapshot(mqRef, (snapshot) => {
+                window.onSnapshot(mqRef, (snapshot) => {
                     let mqMap = {};
                     snapshot.forEach(d => {
                         let data = d.data();
@@ -1310,9 +1318,9 @@
                 });
 
                 // 3. Topic Schedules Sync
-                const tsRef = collection(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules');
+                const tsRef = window.collection(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules');
                 try {
-                    const snap = await getDocs(tsRef);
+                    const snap = await window.getDocs(tsRef);
                     let tsMap = {};
                     snap.forEach(d => {
                         let data = d.data();
@@ -1326,7 +1334,7 @@
                     }
                 } catch (e) {}
 
-                onSnapshot(tsRef, (snapshot) => {
+                window.onSnapshot(tsRef, (snapshot) => {
                     let tsMap = {};
                     snapshot.forEach(d => {
                         let data = d.data();
@@ -1363,7 +1371,7 @@
                 if (window.db && window.cloudSyncActive) {
                     dataList.forEach(item => {
                         const itemId = item.id || ('item_' + Date.now());
-                        setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId), item).catch(err => {});
+                        window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId), item).catch(err => {});
                     });
                 }
             } catch (e) {}
@@ -1372,7 +1380,7 @@
         function deleteFromCloud(collectionName, itemId) {
             try {
                 if (window.db && window.cloudSyncActive) {
-                    deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId)).catch(e => {});
+                    window.deleteDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId)).catch(e => {});
                 }
             } catch (e) {}
         }
@@ -2630,7 +2638,7 @@
                         localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
                         for (let k in data.masterQuestionsByGradeAndTopic) {
                             if (window.db && window.cloudSyncActive) {
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', k.replace(/\s+/g, '_')), {
+                                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', k.replace(/\s+/g, '_')), {
                                     key: k, questions: data.masterQuestionsByGradeAndTopic[k]
                                 }).catch(e => {});
                             }
@@ -2641,7 +2649,7 @@
                         localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
                         for (let k in data.topicSchedules) {
                             if (window.db && window.cloudSyncActive) {
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', k.replace(/\s+/g, '_')), {
+                                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', k.replace(/\s+/g, '_')), {
                                     key: k, schedule: data.topicSchedules[k]
                                 }).catch(e => {});
                             }
@@ -2975,14 +2983,14 @@
             // Save master_questions and topic_schedules to Cloud Firestore
             const safeId = tKey.replace(/\s+/g, '_');
             if (window.db && window.cloudSyncActive) {
-                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', safeId), {
+                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', safeId), {
                     key: tKey,
                     grade,
                     topic,
                     questions: window.tempQuizQuestions
                 }).catch(e => {});
 
-                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', safeId), {
+                window.setDoc(window.doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', safeId), {
                     key: tKey,
                     grade,
                     topic,
