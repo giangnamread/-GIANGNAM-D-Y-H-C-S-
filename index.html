@@ -116,6 +116,9 @@
                 <button onclick="switchTab('documents')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Tài liệu</button>
                 <button onclick="switchTab('quiz')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Kiểm tra Online</button>
                 <button onclick="switchTab('ai')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Trợ lý AI</button>
+                <button onclick="switchTab('storage')" class="px-3 py-2 rounded-lg text-sm font-medium text-amber-400 hover:text-white hover:bg-slate-800 transition flex items-center space-x-1">
+    <i class="fa-solid fa-database mr-1"></i><span>Lưu trữ & Sao lưu</span>
+</button>
                 <button onclick="switchTab('about')" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">Về thầy Nam</button>
                 <button onclick="switchTab('teacher')" class="px-3 py-2 rounded-lg text-sm font-medium text-indigo-400 hover:text-white hover:bg-slate-800 transition">Dashboard</button>
             </nav>
@@ -158,6 +161,9 @@
             <button onclick="switchTab('documents'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-slate-800 font-medium text-white">Tài liệu</button>
             <button onclick="switchTab('quiz'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-slate-800 font-medium text-white">Kiểm tra Online</button>
             <button onclick="switchTab('ai'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-slate-800 font-medium text-white">Trợ lý AI</button>
+            <button onclick="switchTab('storage'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-amber-950/40 font-medium text-amber-300 border border-amber-500/30 flex items-center space-x-2">
+    <i class="fa-solid fa-database mr-2"></i><span>Lưu trữ & Sao lưu</span>
+</button>
             <button onclick="switchTab('about'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-slate-800 font-medium text-white">Về thầy Nam</button>
             <button onclick="switchTab('teacher'); toggleMobileMenu();" class="text-left px-4 py-3 rounded-xl bg-indigo-900/50 font-medium text-indigo-300 border border-indigo-500/30">Dashboard Giáo viên</button>
         </div>
@@ -270,6 +276,48 @@
             </div>
             <div id="documentsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
+        <!-- STORAGE & BACKUP TAB -->
+<div id="tab-storage" class="hidden space-y-8">
+    <div class="bg-gradient-to-r from-amber-950/40 via-slate-900 to-indigo-950/40 border border-amber-500/30 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <span class="text-xs uppercase font-bold tracking-wider text-amber-400">HỆ THỐNG LƯU TRỮ ĐÁM MÂY & SAO LƯU DỮ LIỆU</span>
+            <h2 class="text-2xl font-bold text-white">QUẢN LÝ LƯU TRỮ & KẾT QUẢ BÀI NỘP</h2>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="exportBackupJson()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shadow">
+                <i class="fa-solid fa-download"></i><span>Tải file sao lưu (.JSON)</span>
+            </button>
+            <button onclick="loadDanhSachBaiNop()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow">
+                <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải lại dữ liệu Đám Mây</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bảng quản lý kết quả & reset bài làm học sinh -->
+    <div class="bg-slate-800/50 border border-slate-700/80 rounded-2xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h3 class="font-bold text-white text-lg">Quản lý Kết quả & Cấp quyền Làm lại Bài kiểm tra</h3>
+            <button onclick="exportScoresExcel()" class="text-xs bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-600/30 transition"><i class="fa-solid fa-file-excel mr-1"></i>Xuất điểm Excel (Alphabet)</button>
+        </div>
+        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+                <thead class="bg-slate-900/80 text-xs uppercase text-slate-400 sticky top-0">
+                    <tr>
+                        <th class="p-3">Họ và tên học sinh</th>
+                        <th class="p-3">Lớp</th>
+                        <th class="p-3">Chủ đề</th>
+                        <th class="p-3">Điểm số</th>
+                        <th class="p-3">Trạng thái</th>
+                        <th class="p-3 text-right">Thao tác quản lý</th>
+                    </tr>
+                </thead>
+                <tbody id="bangQuanLyHocSinh" class="divide-y divide-slate-700">
+                    <tr><td colspan="6" class="p-4 text-center text-slate-500 italic">Đang tải dữ liệu từ đám mây...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
         <!-- QUIZ TAB -->
         <div id="tab-quiz" class="hidden space-y-6">
@@ -1323,14 +1371,15 @@
         }
 
         function switchTab(tabId) {
-            ['home', 'lessons', 'documents', 'quiz', 'ai', 'about', 'teacher'].forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                if (el) el.classList.add('hidden');
-            });
-            const target = document.getElementById(`tab-${tabId}`);
-            if (target) target.classList.remove('hidden');
-            refreshActiveViews();
-            window.scrollTo(0, 0);
+    ['home', 'lessons', 'documents', 'quiz', 'ai', 'storage', 'about', 'teacher'].forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) el.classList.add('hidden');
+    });
+    const target = document.getElementById(`tab-${tabId}`);
+    if (target) target.classList.remove('hidden');
+    refreshActiveViews();
+    window.scrollTo(0, 0);
+}
         }
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
