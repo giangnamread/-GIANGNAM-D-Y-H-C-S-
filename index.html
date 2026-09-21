@@ -2610,55 +2610,43 @@
         }
 
         function importBackupJsonFile() {
-            const fileInput = document.getElementById('importJsonFileInput');
-            if (!fileInput || fileInput.files.length === 0) {
-                showMessage('Chưa chọn file', 'Vui lòng chọn một file sao lưu (.JSON)!');
-                return;
+    const fileInput = document.getElementById('importJsonFileInput');
+    if (!fileInput || fileInput.files.length === 0) {
+        showMessage('Chưa chọn file', 'Vui lòng chọn một file sao lưu (.JSON)!');
+        return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (data.lessonsList) { window.lessonsList = data.lessonsList; saveToCloud('lessons', data.lessonsList); }
+            if (data.documentsList) { window.documentsList = data.documentsList; saveToCloud('documents', data.documentsList); }
+            if (data.studentsList) { window.studentsList = data.studentsList; saveToCloud('students', data.studentsList); }
+            if (data.classesList) { window.classesList = data.classesList; saveToCloud('classes', data.classesList); }
+            if (data.masterQuestionsByGradeAndTopic) { 
+                window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; 
+                localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
             }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.lessonsList) { window.lessonsList = data.lessonsList; saveToCloud('lessons', data.lessonsList); }
-                    if (data.documentsList) { window.documentsList = data.documentsList; saveToCloud('documents', data.documentsList); }
-                    if (data.studentsList) { window.studentsList = data.studentsList; saveToCloud('students', data.studentsList); }
-                    if (data.classesList) { window.classesList = data.classesList; saveToCloud('classes', data.classesList); }
-                    if (data.masterQuestionsByGradeAndTopic) { 
-                        window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; 
-                        localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
-                        for (let k in data.masterQuestionsByGradeAndTopic) {
-                            if (window.db && window.cloudSyncActive) {
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', k.replace(/\s+/g, '_')), {
-                                    key: k, questions: data.masterQuestionsByGradeAndTopic[k]
-                                }).catch(e => {});
-                            }
-                        }
-                    }
-                    if (data.topicSchedules) { 
-                        window.topicSchedules = data.topicSchedules; 
-                        localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
-                        for (let k in data.topicSchedules) {
-                            if (window.db && window.cloudSyncActive) {
-                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', k.replace(/\s+/g, '_')), {
-                                    key: k, schedule: data.topicSchedules[k]
-                                }).catch(e => {});
-                            }
-                        }
-                    }
-                    if (data.submissionsList) { window.submissionsList = data.submissionsList; saveToCloud('submissions', data.submissionsList); }
+            if (data.topicSchedules) { 
+                window.topicSchedules = data.topicSchedules; 
+                localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
+            }
+            if (data.submissionsList) { window.submissionsList = data.submissionsList; saveToCloud('submissions', data.submissionsList); }
 
-                    closeModal('backupModal');
-                    refreshActiveViews();
-                    showMessage('Thành công', 'Đã nhập dữ liệu từ file sao lưu thành công và đồng bộ lên đám mây!');
-                } catch (err) {
-                    showMessage('Lỗi định dạng', 'File JSON không hợp lệ hoặc bị hỏng!');
-                }
-            };
-            reader.readAsText(file);
+            closeModal('backupModal');
+            refreshActiveViews();
+            showMessage('Thành công', 'Đã nhập dữ liệu từ file sao lưu thành công và đồng bộ lên đám mây!');
+        } catch (err) {
+            // Hiển thị lỗi chi tiết để biết nguyên nhân
+            showMessage('Lỗi cú pháp JSON', 'Chi tiết lỗi: ' + err.message);
+            console.error("JSON Parse Error:", err);
         }
-
-        function openQuizBuilderModal() {
+    };
+    reader.readAsText(file);
+}
+                function openQuizBuilderModal() {
             const titleInput = document.getElementById('quizTitleInput');
             if (titleInput) titleInput.value = 'Kiểm tra HĐTN - Chủ đề 1';
             updateBuilderTopicDropdown();
