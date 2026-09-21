@@ -2967,7 +2967,7 @@
             closeQuizBuilderModal();
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
-    </script>
+<script>
     // Hàm reset bài làm cho học sinh bất kỳ bằng Firebase Firestore
 function resetBaiLam(docId) {
     if (confirm("Thầy có chắc chắn muốn cho học sinh này làm lại bài từ đầu không?")) {
@@ -2987,7 +2987,7 @@ function resetBaiLam(docId) {
         });
     }
 }
-   
+    </script>
     <!-- ========================================== -->
     <!-- VỊ TRÍ 2: ĐẶT PHẦN CSS IN ẤN Ở ĐÂY         -->
     <!-- ========================================== -->
@@ -3016,8 +3016,7 @@ function resetBaiLam(docId) {
         <button onclick="inPhieuKetQua()" class="btn btn-primary">In trực tiếp / Lưu PDF</button>
         <button onclick="taiAnhPhieuKetQua()" class="btn btn-success">Tải ảnh Phiếu kết quả</button>
     </div>
-
-
+    
     <!-- ========================================== -->
     <!-- VỊ TRÍ 3: ĐẶT THƯ VIỆN VÀ MÃ JAVASCRIPT      -->
     <!-- ========================================== -->
