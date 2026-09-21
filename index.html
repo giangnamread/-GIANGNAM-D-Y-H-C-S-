@@ -1021,7 +1021,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-6 space-y-4 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('backupModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             <h3 class="font-bold text-lg text-white">Cài đặt & Sao lưu / Chuyển dữ liệu</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">Xuất file sao lưu JSON hoặc nhập file JSON từ máy khác để đồng bộ toàn bộ dữ liệu:</p>
+            <p class="text-xs text-slate-300 leading-relaxed">Xuất file sao lưu JSON hoặc nhập file JSON từ máy khác để đồng bộ toàn bộ dữ liệu (Chỉ dùng tùy chọn, hệ thống đã đồng bộ tự động qua Cloud):</p>
             
             <div class="space-y-3 pt-2">
                 <button onclick="exportBackupJson()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-xs font-semibold transition flex items-center justify-center space-x-2">
@@ -1064,13 +1064,13 @@
         window.tempQuizQuestions = [];
         window.activeTakingTopicKey = null;
         window.quizTimerInterval = null;
+        window.cloudListenersInitialized = false;
 
         function cleanQuestionText(rawText) {
             if (!rawText) return "";
             return String(rawText).replace(/^(câu\s*\d+[\:\.]?\s*|\d+[\.\)]\s*)/i, '').trim();
         }
 
-        // HĐTN Evaluation Rule: <5: Không đạt | 5-6.9: Đạt | 7-8.9: Khá | 9-10: Xuất sắc
         function getHdtnEvaluation(score) {
             const num = parseFloat(score);
             if (num < 5.0) return { label: 'Không đạt', color: 'text-red-400 bg-red-500/10 border-red-500/30' };
@@ -1079,7 +1079,6 @@
             return { label: 'Đạt', color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
         }
 
-        // High-Entropy Seeded Shuffling for both Question Order and Option Positions (keeping A,B,C,D labels)
         function shuffleQuestionsWithSeed(questions, codeStr) {
             if (!questions || questions.length === 0) return [];
             let seed = parseInt(String(codeStr).replace(/\D/g, ''), 10) || 1234;
@@ -1088,9 +1087,7 @@
                 return seed / 2147483647;
             }
             let cloned = JSON.parse(JSON.stringify(questions));
-            cloned.forEach(q => {
-                q.text = cleanQuestionText(q.text);
-            });
+            cloned.forEach(q => { q.text = cleanQuestionText(q.text); });
 
             for (let i = cloned.length - 1; i > 0; i--) {
                 const j = Math.floor(seededRandom() * (i + 1));
@@ -1114,9 +1111,7 @@
                 let newCorrectKey = 'A';
                 keys.forEach((k, i) => {
                     newOpts[k] = values[i];
-                    if (values[i] === originalCorrectVal) {
-                        newCorrectKey = k;
-                    }
+                    if (values[i] === originalCorrectVal) { newCorrectKey = k; }
                 });
                 q.options = newOpts;
                 q.correct = newCorrectKey;
@@ -1135,7 +1130,6 @@
             checkAutoExpiredQuizzes();
         });
 
-        // Check if deadline has passed for any unsubmitted topic and auto-submit 0 points if needed
         function checkAutoExpiredQuizzes() {
             if (!window.currentUser || window.currentUser.role !== 'student') return;
             const currentStudent = window.studentsList.find(s => s.name === window.currentUser.name && s.class === window.currentUser.class);
@@ -1202,7 +1196,7 @@
             topicEl.innerHTML = topics.map(t => `<option value="${t}">${t}</option>`).join('');
         }
 
-        // Chunked Cloud Storage Engine for Heavy Files (Lessons & Worksheets to prevent 1MB Firestore limit)
+        // Chunked Cloud Storage Engine for Heavy Files (Lessons & Worksheets)
         function saveLargeItemToCloud(collectionName, item) {
             try {
                 let list = (collectionName === 'lessons' ? window.lessonsList : window.documentsList);
@@ -1240,15 +1234,18 @@
             } catch (e) {}
         }
 
-        // Enhanced Real-Time & Initial Fetch Cloud Sync Engine (Guarantees immediate loading on mobile and all devices)
+        // FULL CLOUD SYNC ENGINE for ALL 7 Data categories (Prevents duplicate listeners)
         window.initCloudListeners = async function() {
             if (!window.db) return;
+            if (window.cloudListenersInitialized) return;
+            window.cloudListenersInitialized = true;
+
             try {
+                // 1. Standard collections: classes, students, lessons, documents, submissions
                 const collectionsToSync = ['classes', 'students', 'lessons', 'documents', 'submissions'];
                 for (const colName of collectionsToSync) {
                     const qRef = collection(window.db, 'artifacts', appId, 'public', 'data', colName);
                     
-                    // Initial Fetch using getDocs to instantly load on mobile
                     try {
                         const snapshot = await getDocs(qRef);
                         let cloudData = [];
@@ -1264,7 +1261,6 @@
                         console.warn(`Fetch notice for ${colName}:`, fetchErr);
                     }
 
-                    // Real-time snapshot listener
                     onSnapshot(qRef, (snapshot) => {
                         let cloudData = [];
                         snapshot.forEach(docSnap => cloudData.push(docSnap.data()));
@@ -1280,6 +1276,71 @@
                         console.warn(`Listener error for ${colName}:`, err);
                     });
                 }
+
+                // 2. Master Questions (quizzes) Sync
+                const mqRef = collection(window.db, 'artifacts', appId, 'public', 'data', 'master_questions');
+                try {
+                    const snap = await getDocs(mqRef);
+                    let mqMap = {};
+                    snap.forEach(d => {
+                        let data = d.data();
+                        if (data && data.key && data.questions) {
+                            mqMap[data.key] = data.questions;
+                        }
+                    });
+                    if (Object.keys(mqMap).length > 0) {
+                        window.masterQuestionsByGradeAndTopic = mqMap;
+                        localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(mqMap));
+                    }
+                } catch (e) {}
+
+                onSnapshot(mqRef, (snapshot) => {
+                    let mqMap = {};
+                    snapshot.forEach(d => {
+                        let data = d.data();
+                        if (data && data.key && data.questions) {
+                            mqMap[data.key] = data.questions;
+                        }
+                    });
+                    if (Object.keys(mqMap).length > 0) {
+                        window.masterQuestionsByGradeAndTopic = mqMap;
+                        localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(mqMap));
+                        refreshActiveViews();
+                    }
+                });
+
+                // 3. Topic Schedules Sync
+                const tsRef = collection(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules');
+                try {
+                    const snap = await getDocs(tsRef);
+                    let tsMap = {};
+                    snap.forEach(d => {
+                        let data = d.data();
+                        if (data && data.key && data.schedule) {
+                            tsMap[data.key] = data.schedule;
+                        }
+                    });
+                    if (Object.keys(tsMap).length > 0) {
+                        window.topicSchedules = tsMap;
+                        localStorage.setItem('gn_topic_schedules', JSON.stringify(tsMap));
+                    }
+                } catch (e) {}
+
+                onSnapshot(tsRef, (snapshot) => {
+                    let tsMap = {};
+                    snapshot.forEach(d => {
+                        let data = d.data();
+                        if (data && data.key && data.schedule) {
+                            tsMap[data.key] = data.schedule;
+                        }
+                    });
+                    if (Object.keys(tsMap).length > 0) {
+                        window.topicSchedules = tsMap;
+                        localStorage.setItem('gn_topic_schedules', JSON.stringify(tsMap));
+                        refreshActiveViews();
+                    }
+                });
+
                 refreshActiveViews();
             } catch (e) {
                 console.warn("Cloud sync init warning:", e);
@@ -1287,6 +1348,7 @@
         };
 
         function forceSyncCloudData() {
+            window.cloudListenersInitialized = false;
             if (typeof window.initCloudListeners === 'function') {
                 window.initCloudListeners();
                 showMessage('Đồng bộ thành công', 'Đã tải mới toàn bộ dữ liệu từ đám mây (giangnam146-5a353) vào thiết bị của bạn!');
@@ -1307,12 +1369,18 @@
             } catch (e) {}
         }
 
+        function deleteFromCloud(collectionName, itemId) {
+            try {
+                if (window.db && window.cloudSyncActive) {
+                    deleteDoc(doc(window.db, 'artifacts', appId, 'public', 'data', collectionName, itemId)).catch(e => {});
+                }
+            } catch (e) {}
+        }
+
         function loadTeacherAvatar() {
             const savedAvatar = localStorage.getItem('gn_teacher_avatar');
             const imgEl = document.getElementById('aboutTeacherImg');
-            if (savedAvatar && imgEl) {
-                imgEl.src = savedAvatar;
-            }
+            if (savedAvatar && imgEl) { imgEl.src = savedAvatar; }
         }
 
         function handleTeacherAvatarUpload(event) {
@@ -1461,7 +1529,6 @@
                     return;
                 }
                 
-                // Strict exact match check against pre-created student list (case-sensitive & diacritic-sensitive)
                 const studentRecord = window.studentsList.find(s => s.class === selectedClass && s.name === name);
                 if (!studentRecord) {
                     showMessage('Đăng nhập thất bại', 'Họ và tên hoặc lớp học không khớp với danh sách do giáo viên tạo!\n\nLưu ý: Hệ thống yêu cầu gõ chính xác từng ký tự (phân biệt hoa thường, dấu tiếng Việt và ký hiệu A/B nếu trùng tên). Vui lòng kiểm tra lại.');
@@ -1736,7 +1803,6 @@
             }, 1000);
         }
 
-        // Render Quizzes & Topics for Students with schedule checks & single-attempt locking
         function renderQuizzes() {
             const container = document.getElementById('quizContainer');
             const subtitle = document.getElementById('quizSubtitle');
@@ -1961,11 +2027,17 @@
 
         function clearSpecificTopicQuizBank(grade, topic) {
             const tKey = `${grade}_${topic}`;
-            window.masterQuestionsByGradeAndTopic[tKey] = [];
+            delete window.masterQuestionsByGradeAndTopic[tKey];
             delete window.topicSchedules[tKey];
             localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(window.masterQuestionsByGradeAndTopic));
             localStorage.setItem('gn_topic_schedules', JSON.stringify(window.topicSchedules));
-            showMessage('Đã xóa', `Đã xóa sạch kho câu hỏi & lịch của ${topic} (${grade})!`);
+
+            // Sync delete to cloud
+            const safeId = tKey.replace(/\s+/g, '_');
+            deleteFromCloud('master_questions', safeId);
+            deleteFromCloud('topic_schedules', safeId);
+
+            showMessage('Đã xóa', `Đã xóa sạch kho câu hỏi & lịch của ${topic} (${grade}) trên toàn hệ thống!`);
             renderTeacherDashboard();
         }
 
@@ -2211,7 +2283,6 @@
             }
         }
 
-        // Export Excel Alphabet sorted by student name
         function exportScoresExcel() {
             if (!window.submissionsList || window.submissionsList.length === 0) {
                 showMessage('Chưa có dữ liệu', 'Chưa có kết quả bài nộp nào để xuất Excel!');
@@ -2278,7 +2349,6 @@
         function openWordExportModal() { document.getElementById('wordExportModal').classList.add('modal-active'); }
         function openPhotoGradingModal() { document.getElementById('photoGradingModal').classList.add('modal-active'); }
 
-        // Batch Photo Grading for multiple images sorted by Alphabet
         function runBatchOcrScanGrading() {
             const grade = document.getElementById('gradingBatchGrade').value;
             const topic = document.getElementById('gradingBatchTopicSelect').value;
@@ -2334,7 +2404,6 @@
             }
         });
 
-        // Export 4 Exam Codes Word Document with standard margins (Left 2.5, Right 1.5, Top 1.5, Bottom 1.5)
         function exportWordExams() {
             const grade = document.getElementById('exportWordGrade').value;
             const topic = document.getElementById('exportWordTopicSelect').value;
@@ -2353,10 +2422,7 @@
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>${title}</title>
                 <style>
-                    @page {
-                        size: A4 portrait;
-                        margin: 1.5cm 1.5cm 1.5cm 2.5cm; /* Top, Right, Bottom, Left */
-                    }
+                    @page { size: A4 portrait; margin: 1.5cm 1.5cm 1.5cm 2.5cm; }
                     body { font-family: 'Times New Roman', Times, serif; font-size: 13pt; line-height: 1.35; margin: 0; }
                     .header-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
                     .header-table td { width: 50%; vertical-align: top; text-align: center; font-size: 12pt; }
@@ -2389,14 +2455,8 @@
                     htmlContent += `
                         <div class="question">Câu ${qIdx + 1}: ${q.text}</div>
                         <table class="options-table">
-                            <tr>
-                                <td>A. ${opts.A}</td>
-                                <td>B. ${opts.B}</td>
-                            </tr>
-                            <tr>
-                                <td>C. ${opts.C}</td>
-                                <td>D. ${opts.D}</td>
-                            </tr>
+                            <tr><td>A. ${opts.A}</td><td>B. ${opts.B}</td></tr>
+                            <tr><td>C. ${opts.C}</td><td>D. ${opts.D}</td></tr>
                         </table>
                     `;
                 });
@@ -2439,11 +2499,7 @@
                         Mã đề thi: [ &nbsp; ] [ &nbsp; ] [ &nbsp; ] [ &nbsp; ] &nbsp;&nbsp;&nbsp; Số báo danh: [ &nbsp; ] [ &nbsp; ] [ &nbsp; ] [ &nbsp; ]
                     </div>
                     <table class="bubble-table">
-                        <tr>
-                            ${[1, 2, 3, 4].map(_ => `
-                                <th>Câu</th><th>A</th><th>B</th><th>C</th><th>D</th>
-                            `).join('')}
-                        </tr>
+                        <tr>${[1, 2, 3, 4].map(_ => `<th>Câu</th><th>A</th><th>B</th><th>C</th><th>D</th>`).join('')}</tr>
                         ${Array.from({length: 13}, (_, i) => i + 1).map(rowNum => `
                             <tr>
                                 ${[0, 13, 26, 39].map(offset => {
@@ -2494,10 +2550,7 @@
                 <body>
                     <h2 style="text-align:center;">BẢNG ĐÁP ÁN CHUẨN 4 MÃ ĐỀ (${grade} - ${topic})</h2>
                     <table>
-                        <tr>
-                            <th>Câu</th>
-                            ${codes.map(c => `<th>Mã ${c}</th>`).join('')}
-                        </tr>
+                        <tr><th>Câu</th>${codes.map(c => `<th>Mã ${c}</th>`).join('')}</tr>
             `;
 
             for (let i = 0; i < topicQuestions.length; i++) {
@@ -2571,8 +2624,28 @@
                     if (data.documentsList) { window.documentsList = data.documentsList; saveToCloud('documents', data.documentsList); }
                     if (data.studentsList) { window.studentsList = data.studentsList; saveToCloud('students', data.studentsList); }
                     if (data.classesList) { window.classesList = data.classesList; saveToCloud('classes', data.classesList); }
-                    if (data.masterQuestionsByGradeAndTopic) { window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic)); }
-                    if (data.topicSchedules) { window.topicSchedules = data.topicSchedules; localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules)); }
+                    if (data.masterQuestionsByGradeAndTopic) { 
+                        window.masterQuestionsByGradeAndTopic = data.masterQuestionsByGradeAndTopic; 
+                        localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(data.masterQuestionsByGradeAndTopic));
+                        for (let k in data.masterQuestionsByGradeAndTopic) {
+                            if (window.db && window.cloudSyncActive) {
+                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', k.replace(/\s+/g, '_')), {
+                                    key: k, questions: data.masterQuestionsByGradeAndTopic[k]
+                                }).catch(e => {});
+                            }
+                        }
+                    }
+                    if (data.topicSchedules) { 
+                        window.topicSchedules = data.topicSchedules; 
+                        localStorage.setItem('gn_topic_schedules', JSON.stringify(data.topicSchedules));
+                        for (let k in data.topicSchedules) {
+                            if (window.db && window.cloudSyncActive) {
+                                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', k.replace(/\s+/g, '_')), {
+                                    key: k, schedule: data.topicSchedules[k]
+                                }).catch(e => {});
+                            }
+                        }
+                    }
                     if (data.submissionsList) { window.submissionsList = data.submissionsList; saveToCloud('submissions', data.submissionsList); }
 
                     closeModal('backupModal');
@@ -2752,6 +2825,7 @@
         function deleteLesson(id) {
             window.lessonsList = window.lessonsList.filter(x => x.id !== id);
             saveToCloud('lessons', window.lessonsList);
+            deleteFromCloud('lessons', id);
             renderLessons();
             showMessage('Đã xóa', 'Bài học đã được xóa.');
         }
@@ -2793,6 +2867,7 @@
         function deleteDocument(id) {
             window.documentsList = window.documentsList.filter(x => x.id !== id);
             saveToCloud('documents', window.documentsList);
+            deleteFromCloud('documents', id);
             renderDocuments();
             showMessage('Đã xóa', 'Tài liệu đã được xóa.');
         }
@@ -2837,6 +2912,7 @@
         function deleteStudent(id) {
             window.studentsList = window.studentsList.filter(x => x.id !== id);
             saveToCloud('students', window.studentsList);
+            deleteFromCloud('students', id);
             renderTeacherDashboard();
             showMessage('Đã xóa', 'Học sinh đã được xóa.');
         }
@@ -2870,6 +2946,7 @@
         function deleteClass(id) {
             window.classesList = window.classesList.filter(x => x.id !== id);
             saveToCloud('classes', window.classesList);
+            deleteFromCloud('classes', id);
             renderTeacherDashboard();
             showMessage('Đã xóa', 'Lớp học đã được xóa.');
         }
@@ -2893,6 +2970,24 @@
 
             localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(window.masterQuestionsByGradeAndTopic));
             localStorage.setItem('gn_topic_schedules', JSON.stringify(window.topicSchedules));
+
+            // Save master_questions and topic_schedules to Cloud Firestore
+            const safeId = tKey.replace(/\s+/g, '_');
+            if (window.db && window.cloudSyncActive) {
+                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'master_questions', safeId), {
+                    key: tKey,
+                    grade,
+                    topic,
+                    questions: window.tempQuizQuestions
+                }).catch(e => {});
+
+                setDoc(doc(window.db, 'artifacts', appId, 'public', 'data', 'topic_schedules', safeId), {
+                    key: tKey,
+                    grade,
+                    topic,
+                    schedule: { startDate, endDate }
+                }).catch(e => {});
+            }
 
             closeQuizBuilderModal();
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
