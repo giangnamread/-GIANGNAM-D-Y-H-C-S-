@@ -2864,6 +2864,14 @@
             window.topicSchedules[tKey] = { startDate, endDate };
             localStorage.setItem('gn_master_questions_by_grade_topic', JSON.stringify(window.masterQuestionsByGradeAndTopic));
             localStorage.setItem('gn_topic_schedules', JSON.stringify(window.topicSchedules));
+            // ĐỒNG BỘ LÊN FIREBASE ĐÁM MÂY ĐỂ MÁY KHÁC TỰ ĐỘNG TẢI VỀ
+    saveToCloud('quiz_banks', [{
+        id: tKey,
+        grade: grade,
+        topic: topic,
+        questions: window.tempQuizQuestions,
+        schedule: { startDate, endDate }
+    }]);
             closeQuizBuilderModal();
             showMessage('Phát hành thành công', `Đã lưu, định lịch và phát hành bộ đề cho ${topic} (${grade}) lên đám mây vĩnh viễn (giangnam146-5a353) thành công!`);
         }
